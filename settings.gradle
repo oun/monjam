@@ -1,0 +1,4 @@
+rootProject.name = 'monjam'
+
+include 'monjam-core'
+include 'monjam-gradle-plugin'
