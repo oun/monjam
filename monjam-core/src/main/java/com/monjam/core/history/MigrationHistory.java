@@ -4,4 +4,6 @@ import java.util.List;
 
 public interface MigrationHistory {
     List<AppliedMigration> getAppliedMigrations();
+
+    void addAppliedMigration(AppliedMigration appliedMigration);
 }
