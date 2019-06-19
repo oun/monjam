@@ -1,0 +1,7 @@
+package com.monjam.core.history;
+
+import java.util.List;
+
+public interface MigrationHistory {
+    List<AppliedMigration> getAppliedMigrations();
+}
