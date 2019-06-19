@@ -3,6 +3,7 @@ package com.monjam.core.history;
 import com.monjam.core.api.MigrationVersion;
 
 import java.time.ZonedDateTime;
+import java.util.Objects;
 
 public class AppliedMigration {
     private MigrationVersion version;
@@ -37,5 +38,18 @@ public class AppliedMigration {
 
     public void setExecutedAt(ZonedDateTime executedAt) {
         this.executedAt = executedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppliedMigration that = (AppliedMigration) o;
+        return version.equals(that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version);
     }
 }
