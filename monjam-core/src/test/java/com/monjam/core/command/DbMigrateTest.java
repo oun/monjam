@@ -2,12 +2,14 @@ package com.monjam.core.command;
 
 import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
-import com.monjam.core.api.Migration;
+import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.executor.JavaMigrationExecutor;
 import com.monjam.core.history.AppliedMigration;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.JavaResolvedMigration;
 import com.monjam.core.resolve.MigrationResolver;
+import com.monjam.core.resolve.ResolvedMigration;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -20,10 +22,15 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -42,25 +49,102 @@ public class DbMigrateTest {
     @Before
     public void setup() {
         command = new DbMigrate(new Configuration());
+        mockStatic(ZonedDateTime.class);
     }
 
     @Test
-    public void doExecute_GivenEmptyAppliedMigration() {
-        ZonedDateTime now = ZonedDateTime.of(2019, 6, 1, 9, 0, 0, 0, ZoneId.systemDefault());
-        mockStatic(ZonedDateTime.class);
-        when(ZonedDateTime.now()).thenReturn(now);
-        when(migrationResolver.resolveMigrations()).thenReturn(Arrays.asList(
-                new JavaResolvedMigration(new MigrationVersion("0.1"), "", mock(Migration.class)),
-                new JavaResolvedMigration(new MigrationVersion("0.1.1"), "", mock(Migration.class)),
-                new JavaResolvedMigration(new MigrationVersion("0.2.0"), "", mock(Migration.class))
-        ));
-        when(migrationHistory.getAppliedMigrations()).thenReturn(Collections.emptyList());
+    public void doExecute_GivenEmptyAppliedMigrations() {
+        ZonedDateTime executedAt = ZonedDateTime.of(2019, 6, 20, 9, 0, 0, 0, ZoneId.systemDefault());
+        ResolvedMigration migration_0_1 = new JavaResolvedMigration(new MigrationVersion("0.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_1_1 = new JavaResolvedMigration(new MigrationVersion("0.1.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_2 = new JavaResolvedMigration(new MigrationVersion("0.2.0"), "", mock(JavaMigrationExecutor.class));
+        List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1, migration_0_2);
+        List<AppliedMigration> appliedMigrations = Collections.emptyList();
+        when(ZonedDateTime.now()).thenReturn(executedAt);
+        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(database, migrationResolver, migrationHistory);
 
+        verify(migration_0_1.getExecutor(), only()).executeUp(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), only()).executeUp(any(Context.class));
+        verify(migration_0_2.getExecutor(), only()).executeUp(any(Context.class));
+
         InOrder inOrder = inOrder(migrationHistory);
-        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(new MigrationVersion("0.1"), "", now)));
-        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(new MigrationVersion("0.1.1"), "", now)));
-        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(new MigrationVersion("0.2.0"), "", now)));
+        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
+        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(migration_0_1_1.getVersion(), "", executedAt)));
+        inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
+    }
+
+    @Test
+    public void doExecute_GivenEmptyResolvedMigrations() {
+        ZonedDateTime executedAt = ZonedDateTime.of(2019, 6, 20, 9, 0, 0, 0, ZoneId.systemDefault());
+        List<ResolvedMigration> resolvedMigrations = Collections.emptyList();
+        List<AppliedMigration> appliedMigrations = Arrays.asList(
+                new AppliedMigration(new MigrationVersion("0.1.0"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.1.1"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.2.0"), "", executedAt)
+        );
+        when(ZonedDateTime.now()).thenReturn(executedAt);
+        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
+
+        command.doExecute(database, migrationResolver, migrationHistory);
+
+        verify(migrationHistory, never()).addAppliedMigration(any(AppliedMigration.class));
+    }
+
+    @Test
+    public void doExecute_GivenLastAppliedMigrationVersionLessThanLastResolvedMigrationVersion() {
+        ZonedDateTime executedAt = ZonedDateTime.of(2019, 6, 20, 9, 0, 0, 0, ZoneId.systemDefault());
+        ResolvedMigration migration_0_1 = new JavaResolvedMigration(new MigrationVersion("0.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_1_1 = new JavaResolvedMigration(new MigrationVersion("0.1.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_2 = new JavaResolvedMigration(new MigrationVersion("0.2.0"), "", mock(JavaMigrationExecutor.class));
+        List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1, migration_0_2);
+        List<AppliedMigration> appliedMigrations = Arrays.asList(
+                new AppliedMigration(new MigrationVersion("0.1.0"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.1.1"), "", executedAt)
+        );
+        when(ZonedDateTime.now()).thenReturn(executedAt);
+        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
+
+        command.doExecute(database, migrationResolver, migrationHistory);
+
+        verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));
+        verify(migration_0_2.getExecutor(), times(1)).executeUp(any(Context.class));
+
+        verify(migrationHistory, times(1)).addAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
+        verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
+        verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1_1.getVersion(), "", executedAt)));
+    }
+
+    @Test
+    public void doExecute_GivenLastAppliedMigrationVersionGreaterThanLastResolvedMigrationVersion() {
+        ZonedDateTime executedAt = ZonedDateTime.of(2019, 6, 20, 9, 0, 0, 0, ZoneId.systemDefault());
+        ResolvedMigration migration_0_1 = new JavaResolvedMigration(new MigrationVersion("0.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_1_1 = new JavaResolvedMigration(new MigrationVersion("0.1.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_2 = new JavaResolvedMigration(new MigrationVersion("0.2.0"), "", mock(JavaMigrationExecutor.class));
+        List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1, migration_0_2);
+        List<AppliedMigration> appliedMigrations = Arrays.asList(
+                new AppliedMigration(new MigrationVersion("0.1.0"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.1.1"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.2.0"), "", executedAt),
+                new AppliedMigration(new MigrationVersion("0.2.1"), "", executedAt)
+        );
+        when(ZonedDateTime.now()).thenReturn(executedAt);
+        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
+
+        command.doExecute(database, migrationResolver, migrationHistory);
+
+        verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));
+        verify(migration_0_2.getExecutor(), never()).executeUp(any(Context.class));
+
+        verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
+        verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1_1.getVersion(), "", executedAt)));
+        verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
     }
 }

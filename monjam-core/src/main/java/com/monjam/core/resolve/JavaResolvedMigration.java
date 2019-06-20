@@ -11,7 +11,11 @@ public class JavaResolvedMigration implements ResolvedMigration {
     private String description;
 
     public JavaResolvedMigration(MigrationVersion version, String description, Migration migration) {
-        this.executor = new JavaMigrationExecutor(migration);
+        this(version, description, new JavaMigrationExecutor(migration));
+    }
+
+    public JavaResolvedMigration(MigrationVersion version, String description, JavaMigrationExecutor executor) {
+        this.executor = executor;
         this.version = version;
         this.description = description;
     }

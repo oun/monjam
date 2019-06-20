@@ -38,7 +38,7 @@ public class DbMigrate extends Command {
         Context context = new Context(database);
 
         for (ResolvedMigration resolvedMigration : resolvedMigrations) {
-            if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) <= 0) {
+            if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
             }
             LOG.debug("Execute schema migration version {}", resolvedMigration.getVersion());

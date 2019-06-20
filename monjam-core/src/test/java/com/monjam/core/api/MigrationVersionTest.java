@@ -1,4 +1,4 @@
-package com.monjam.core.history;
+package com.monjam.core.api;
 
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.api.MonJamException;
