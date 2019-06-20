@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DbMigrationHistory implements MigrationHistory {
@@ -33,7 +35,7 @@ public class DbMigrationHistory implements MigrationHistory {
                 AppliedMigration appliedMigration = new AppliedMigration(
                         new MigrationVersion(document.getString("version")),
                         document.getString("description"),
-                        ZonedDateTime.ofInstant(document.getDate("executedAt").toInstant(), ZoneId.systemDefault())
+                        ZonedDateTime.ofInstant(document.getDate("executedAt").toInstant(), ZoneOffset.UTC.normalized())
                 );
                 migrationHistories.add(appliedMigration);
             }
@@ -46,7 +48,7 @@ public class DbMigrationHistory implements MigrationHistory {
         Document document = new Document()
                 .append("version", appliedMigration.getVersion().toString())
                 .append("description", appliedMigration.getDescription())
-                .append("executedAt", appliedMigration.getExecutedAt());
+                .append("executedAt", Date.from(appliedMigration.getExecutedAt().toInstant()));
         collection.insertOne(document);
     }
 }
