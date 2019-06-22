@@ -2,7 +2,6 @@ language: java
 
 jdk:
   - oraclejdk8
-  - openjdk8
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -17,4 +16,4 @@ deploy:
   provider: script
   script: ./gradlew monjam-gradle-plugin:publishPlugins -Pgradle.publish.key=$GRADLE_KEY -Pgradle.publish.secret=$GRADLE_SECRET
   on:
-    all_branches: true
+    tags: true
