@@ -3,6 +3,9 @@ apply plugin: 'base'
 subprojects {
     apply plugin: 'java'
 
+    group = 'com.monjam'
+    version = '0.1.0'
+
     sourceCompatibility = 1.8
 
     repositories {

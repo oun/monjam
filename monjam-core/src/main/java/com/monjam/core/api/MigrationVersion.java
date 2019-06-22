@@ -73,4 +73,9 @@ public class MigrationVersion implements Comparable<MigrationVersion> {
         MigrationVersion other = (MigrationVersion) o;
         return this.compareTo(other) == 0;
     }
+
+    @Override
+    public String toString() {
+        return String.format("%d.%d.%d", getMajor(), getMinor(), getPatch());
+    }
 }

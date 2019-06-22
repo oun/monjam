@@ -2,14 +2,15 @@ package com.monjam.core.history;
 
 import com.monjam.core.api.MigrationVersion;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.util.Objects;
 
 public class AppliedMigration {
     private MigrationVersion version;
     private String description;
-    private LocalDateTime executedAt;
+    private ZonedDateTime executedAt;
 
-    public AppliedMigration(MigrationVersion version, String description, LocalDateTime executedAt) {
+    public AppliedMigration(MigrationVersion version, String description, ZonedDateTime executedAt) {
         this.version = version;
         this.description = description;
         this.executedAt = executedAt;
@@ -31,11 +32,24 @@ public class AppliedMigration {
         this.description = description;
     }
 
-    public LocalDateTime getExecutedAt() {
+    public ZonedDateTime getExecutedAt() {
         return executedAt;
     }
 
-    public void setExecutedAt(LocalDateTime executedAt) {
+    public void setExecutedAt(ZonedDateTime executedAt) {
         this.executedAt = executedAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        AppliedMigration that = (AppliedMigration) o;
+        return version.equals(that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(version);
     }
 }
