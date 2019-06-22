@@ -1,0 +1,26 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'com.gradle.plugin-publish' version '0.10.0'
+}
+
+dependencies {
+    implementation gradleApi()
+    implementation project(':monjam-core')
+}
+
+pluginBundle {
+    website = 'https://github.com/oun/monjam'
+    vcsUrl = 'https://github.com/oun/monjam'
+    tags = ['mongodb', 'migration']
+}
+
+gradlePlugin {
+    plugins {
+        monjamPlugin {
+            id = 'com.monjam.monjam'
+            displayName = 'Monjam Plugin'
+            description = 'MongoDB migration'
+            implementationClass = 'com.monjam.gradle.MonjamPlugin'
+        }
+    }
+}
