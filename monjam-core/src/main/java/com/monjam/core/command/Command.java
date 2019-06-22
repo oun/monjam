@@ -44,7 +44,7 @@ public abstract class Command {
 
         return MongoClients.create(MongoClientSettings.builder()
                 .applyConnectionString(new ConnectionString(configuration.getUrl()))
-                .credential(MongoCredential.createCredential(configuration.getUsername(), "admin", configuration.getPassword().toCharArray()))
+//                .credential(MongoCredential.createCredential(configuration.getUsername(), "admin", configuration.getPassword().toCharArray()))
                 .build()
         );
     }

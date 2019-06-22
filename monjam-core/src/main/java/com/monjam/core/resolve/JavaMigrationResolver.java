@@ -34,6 +34,7 @@ public class JavaMigrationResolver implements MigrationResolver {
         ) {
             for (Class<?> migrationClass : scanResult.getClassesImplementing(Migration.class.getName()).loadClasses()) {
                 String migrationName = migrationClass.getSimpleName();
+                LOG.debug("Found migration {}", migrationName);
                 MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
                 Migration migration = ClassUtils.instantiate(migrationClass);
                 resolvedMigrations.add(new JavaResolvedMigration(migrationInfo.getVersion(), migrationInfo.getDescription(), migration));

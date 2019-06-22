@@ -28,9 +28,9 @@ public class JavaMigrationResolverIT {
 
         assertThat(migrations, hasSize(2));
         assertThat(migrations.get(0).getVersion(), equalTo(new MigrationVersion("0.1.0")));
-        assertThat(migrations.get(0).getDescription(), equalTo("First migration"));
+        assertThat(migrations.get(0).getDescription(), equalTo("Create collection"));
 
         assertThat(migrations.get(1).getVersion(), equalTo(new MigrationVersion("0.1.1")));
-        assertThat(migrations.get(1).getDescription(), equalTo("Second migration"));
+        assertThat(migrations.get(1).getDescription(), equalTo("Create index"));
     }
 }
