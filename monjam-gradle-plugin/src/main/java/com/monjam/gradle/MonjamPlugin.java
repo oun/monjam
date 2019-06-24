@@ -8,6 +8,6 @@ public class MonjamPlugin implements Plugin<Project> {
     @Override
     public void apply(Project project) {
         project.getExtensions().create("monjam", MonjamExtension.class);
-        project.getTasks().create("monjamMigrate", MigrateTask.class);
+        project.getTasks().create("mjMigrate", MigrateTask.class);
     }
 }

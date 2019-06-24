@@ -17,7 +17,7 @@ public class JavaMigrationResolverIT {
     @Before
     public void setup() {
         Configuration configuration = Configuration.builder()
-                .location("com.monjam.core.db.migration")
+                .location("com/monjam/core/db/migration")
                 .build();
         migrationResolver = new JavaMigrationResolver(configuration);
     }

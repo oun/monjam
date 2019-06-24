@@ -29,8 +29,10 @@ public class JavaMigrationResolver implements MigrationResolver {
         LOG.info("Scanning migration classes in {}", configuration.getLocation());
         List<ResolvedMigration> resolvedMigrations = new ArrayList<>();
         try(ScanResult scanResult = new ClassGraph()
+                .addClassLoader(configuration.getClassLoader())
                 .enableAllInfo()
-                .whitelistPackages(configuration.getLocation()).scan()
+                .whitelistPackages(configuration.getLocation())
+                .scan()
         ) {
             for (Class<?> migrationClass : scanResult.getClassesImplementing(Migration.class.getName()).loadClasses()) {
                 String migrationName = migrationClass.getSimpleName();
