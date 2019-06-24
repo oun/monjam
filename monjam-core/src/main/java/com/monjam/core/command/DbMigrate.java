@@ -30,7 +30,7 @@ public class DbMigrate extends Command {
         if (appliedMigrations.size() > 0) {
             AppliedMigration lastAppliedMigration = appliedMigrations.get(appliedMigrations.size() - 1);
             currentVersion = lastAppliedMigration.getVersion();
-            LOG.info("Last applied migration version: {}", currentVersion);
+            LOG.info("Last applied migration version {}", currentVersion);
         } else {
             LOG.info("No applied migrations found");
         }
@@ -41,7 +41,7 @@ public class DbMigrate extends Command {
             if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
             }
-            LOG.debug("Execute schema migration version {}", resolvedMigration.getVersion());
+            LOG.info("Execute schema migration version {}", resolvedMigration.getVersion());
             resolvedMigration.getExecutor().executeUp(context);
 
             migrationHistory.addAppliedMigration(new AppliedMigration(

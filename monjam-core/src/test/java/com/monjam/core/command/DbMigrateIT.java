@@ -38,7 +38,7 @@ public class DbMigrateIT {
     @Before
     public void setup() {
         configuration = Configuration.builder()
-                .location("com.monjam.core.db.migration")
+                .location("com/monjam/core/db/migration")
                 .url("mongodb://localhost:12345")
                 .database("testdb")
                 .build();

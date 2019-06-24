@@ -1,6 +1,7 @@
 package com.monjam.core.api;
 
 public class Configuration {
+    private ClassLoader classLoader;
     private String collection = "schema_migrations";
     private String location = "db/migrations";
     private String url;
@@ -14,10 +15,6 @@ public class Configuration {
 
     public String getCollection() {
         return collection;
-    }
-
-    private void setCollection(String collection) {
-        this.collection = collection;
     }
 
     public String getLocation() {
@@ -40,8 +37,17 @@ public class Configuration {
         return database;
     }
 
+    public ClassLoader getClassLoader() {
+        return classLoader;
+    }
+
     public static class ConfigurationBuilder {
         private Configuration configuration = new Configuration();
+
+        public ConfigurationBuilder classLoader(ClassLoader classLoader) {
+            configuration.classLoader = classLoader;
+            return this;
+        }
 
         public ConfigurationBuilder location(String location) {
             configuration.location = location;
