@@ -2,6 +2,7 @@ apply plugin: 'base'
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'maven-publish'
 
     group = 'com.monjam'
     version = '0.1.0'
@@ -10,5 +11,13 @@ subprojects {
 
     repositories {
         mavenCentral()
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                from components.java
+            }
+        }
     }
 }
