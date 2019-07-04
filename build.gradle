@@ -1,23 +1,10 @@
 apply plugin: 'base'
 
 subprojects {
-    apply plugin: 'java'
-    apply plugin: 'maven-publish'
-
-    group = 'com.monjam'
-    version = '0.1.0'
-
-    sourceCompatibility = 1.8
+    group = 'io.github.oun'
+    version = '0.1.1'
 
     repositories {
         mavenCentral()
-    }
-
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                from components.java
-            }
-        }
     }
 }

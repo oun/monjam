@@ -3,6 +3,11 @@ plugins {
     id 'com.gradle.plugin-publish' version '0.10.0'
 }
 
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+
+sourceCompatibility = 1.8
+
 dependencies {
     implementation gradleApi()
     implementation project(':monjam-core')
@@ -17,10 +22,18 @@ pluginBundle {
 gradlePlugin {
     plugins {
         monjamPlugin {
-            id = 'com.monjam.monjam'
+            id = 'io.github.oun.monjam'
             displayName = 'Monjam Plugin'
             description = 'MongoDB migration'
             implementationClass = 'com.monjam.gradle.MonjamPlugin'
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
         }
     }
 }
