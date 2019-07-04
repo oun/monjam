@@ -1,5 +1,6 @@
 package com.monjam.core.command;
 
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.Context;
@@ -42,14 +43,19 @@ public class DbMigrateTest {
     @Mock
     private MongoDatabase database;
     @Mock
+    private ClientSession session;
+    @Mock
     private MigrationHistory migrationHistory;
     @Mock
     private MigrationResolver migrationResolver;
+
+    private Context context;
 
     @Before
     public void setup() {
         command = new DbMigrate(new Configuration());
         mockStatic(ZonedDateTime.class);
+        context = new Context(database, session);
     }
 
     @Test
@@ -64,7 +70,7 @@ public class DbMigrateTest {
         when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
-        command.doExecute(database, migrationResolver, migrationHistory);
+        command.doExecute(context, migrationResolver, migrationHistory);
 
         verify(migration_0_1.getExecutor(), only()).executeUp(any(Context.class));
         verify(migration_0_1_1.getExecutor(), only()).executeUp(any(Context.class));
@@ -89,7 +95,7 @@ public class DbMigrateTest {
         when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
-        command.doExecute(database, migrationResolver, migrationHistory);
+        command.doExecute(context, migrationResolver, migrationHistory);
 
         verify(migrationHistory, never()).addAppliedMigration(any(AppliedMigration.class));
     }
@@ -109,7 +115,7 @@ public class DbMigrateTest {
         when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
-        command.doExecute(database, migrationResolver, migrationHistory);
+        command.doExecute(context, migrationResolver, migrationHistory);
 
         verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
         verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));
@@ -137,7 +143,7 @@ public class DbMigrateTest {
         when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
-        command.doExecute(database, migrationResolver, migrationHistory);
+        command.doExecute(context, migrationResolver, migrationHistory);
 
         verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
         verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));

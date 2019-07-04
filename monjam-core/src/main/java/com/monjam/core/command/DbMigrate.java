@@ -1,9 +1,9 @@
 package com.monjam.core.command;
 
-import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.database.TransactionTemplate;
 import com.monjam.core.history.AppliedMigration;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.MigrationResolver;
@@ -22,7 +22,7 @@ public class DbMigrate extends Command {
     }
 
     @Override
-    protected void doExecute(MongoDatabase database, MigrationResolver migrationResolver, MigrationHistory migrationHistory) {
+    protected void doExecute(Context context, MigrationResolver migrationResolver, MigrationHistory migrationHistory) {
         List<ResolvedMigration> resolvedMigrations = migrationResolver.resolveMigrations();
         List<AppliedMigration> appliedMigrations = migrationHistory.getAppliedMigrations();
 
@@ -35,20 +35,24 @@ public class DbMigrate extends Command {
             LOG.info("No applied migrations found");
         }
 
-        Context context = new Context(database);
-
         for (ResolvedMigration resolvedMigration : resolvedMigrations) {
             if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
             }
             LOG.info("Execute schema migration version {}", resolvedMigration.getVersion());
-            resolvedMigration.getExecutor().executeUp(context);
-
-            migrationHistory.addAppliedMigration(new AppliedMigration(
-                    resolvedMigration.getVersion(),
-                    resolvedMigration.getDescription(),
-                    ZonedDateTime.now()
-            ));
+            new TransactionTemplate().executeInTransaction(context, ctx ->
+                    applyMigration(ctx, resolvedMigration, migrationHistory)
+            );
         }
+    }
+
+    private void applyMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
+        resolvedMigration.getExecutor().executeUp(context);
+
+        migrationHistory.addAppliedMigration(new AppliedMigration(
+                resolvedMigration.getVersion(),
+                resolvedMigration.getDescription(),
+                ZonedDateTime.now()
+        ));
     }
 }

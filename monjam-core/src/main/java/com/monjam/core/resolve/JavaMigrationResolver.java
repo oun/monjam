@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -27,11 +28,14 @@ public class JavaMigrationResolver implements MigrationResolver {
             throw new MonJamException("Missing migration location");
         }
         LOG.info("Scanning migration classes in {}", configuration.getLocation());
+        String[] locations = Arrays.stream(configuration.getLocation().split(","))
+                .map(String::trim)
+                .toArray(String[]::new);
         List<ResolvedMigration> resolvedMigrations = new ArrayList<>();
         try(ScanResult scanResult = new ClassGraph()
                 .addClassLoader(configuration.getClassLoader())
                 .enableAllInfo()
-                .whitelistPackages(configuration.getLocation())
+                .whitelistPackages(locations)
                 .scan()
         ) {
             for (Class<?> migrationClass : scanResult.getClassesImplementing(Migration.class.getName()).loadClasses()) {

@@ -6,7 +6,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.monjam.core.api.Configuration;
-import com.monjam.core.rule.MongoRule;
+import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
@@ -29,7 +29,7 @@ import static org.junit.Assert.assertThat;
 
 public class DbMigrateIT {
     @ClassRule
-    public static final MongoRule MONGO_RULE = new MongoRule();
+    public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
 
     private Configuration configuration;
     private MongoDatabase database;
@@ -39,10 +39,11 @@ public class DbMigrateIT {
     public void setup() {
         configuration = Configuration.builder()
                 .location("com/monjam/core/db/migration")
-                .url("mongodb://localhost:12345")
+                .url("mongodb://localhost:27117")
                 .database("testdb")
+                .collection("schema_migrations")
                 .build();
-        MongoClient client = MongoClients.create("mongodb://localhost:12345");
+        MongoClient client = MongoClients.create("mongodb://localhost:27117");
         database = client.getDatabase("testdb");
         dbMigrate = new DbMigrate(configuration);
     }
@@ -80,6 +81,11 @@ public class DbMigrateIT {
         assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
         assertThat(migrations.get(1).getString("version"), equalTo("0.1.1"));
         assertThat(migrations.get(1).getString("description"), equalTo("Create index"));
+    }
+
+    @Test
+    public void execute_GivenMigrationThrowError() throws Exception {
+
     }
 
     private List<Document> findAll(String collectionName, Bson sort) {
