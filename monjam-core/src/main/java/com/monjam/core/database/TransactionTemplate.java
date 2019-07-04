@@ -26,9 +26,12 @@ public class TransactionTemplate {
 
             session.commitTransaction();
             LOG.debug("Transaction was committed");
-        } catch (Exception e) {
-            session.abortTransaction();
-            LOG.warn("Transaction was rollback", e);
+        } catch (Exception exception) {
+            if (session.hasActiveTransaction()) {
+                session.abortTransaction();
+            }
+            LOG.warn("Transaction was rollback", exception);
+            throw exception;
         }
     }
 }
