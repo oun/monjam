@@ -3,9 +3,8 @@
 MongoDB migration 
 
 ### Features
-- Migrate or rollback schema versions
+- Java based migration
 - Run migration within transaction (MongoDB 4.0+)
-- Java or Spring MongoTemplate based migration
 
 ### Installation
 

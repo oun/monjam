@@ -39,9 +39,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             customizePom(pom)
-            groupId 'io.github.oun'
             artifactId 'monjam-core'
-            version '0.1.0'
 
             // create the sign pom artifact
             pom.withXml {

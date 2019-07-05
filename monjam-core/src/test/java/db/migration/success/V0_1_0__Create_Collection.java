@@ -1,4 +1,4 @@
-package db.migration;
+package db.migration.success;
 
 import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Context;

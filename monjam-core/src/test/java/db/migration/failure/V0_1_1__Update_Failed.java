@@ -1,4 +1,4 @@
-package com.monjam.core.db.migration;
+package db.migration.failure;
 
 import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Context;
@@ -9,7 +9,7 @@ import org.bson.types.ObjectId;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
-public class V0_1_1__Update_Document implements Migration {
+public class V0_1_1__Update_Failed implements Migration {
     private static final String COLLECTION = "messages";
 
     @Override

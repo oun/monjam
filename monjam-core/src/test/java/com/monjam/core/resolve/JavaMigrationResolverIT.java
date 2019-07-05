@@ -17,7 +17,7 @@ public class JavaMigrationResolverIT {
     @Before
     public void setup() {
         Configuration configuration = Configuration.builder()
-                .location("db/migration,com.monjam.core.db.migration")
+                .location("db/migration/success")
                 .build();
         migrationResolver = new JavaMigrationResolver(configuration);
     }
@@ -26,14 +26,11 @@ public class JavaMigrationResolverIT {
     public void resolveMigrations() {
         List<ResolvedMigration> migrations = migrationResolver.resolveMigrations();
 
-        assertThat(migrations, hasSize(3));
+        assertThat(migrations, hasSize(2));
         assertThat(migrations.get(0).getVersion(), equalTo(new MigrationVersion("0.1.0")));
         assertThat(migrations.get(0).getDescription(), equalTo("Create Collection"));
 
-        assertThat(migrations.get(1).getVersion(), equalTo(new MigrationVersion("0.1.1")));
-        assertThat(migrations.get(1).getDescription(), equalTo("Update Document"));
-
-        assertThat(migrations.get(2).getVersion(), equalTo(new MigrationVersion("0.1.2")));
+        assertThat(migrations.get(2).getVersion(), equalTo(new MigrationVersion("0.2.0")));
         assertThat(migrations.get(2).getDescription(), equalTo("Create Index"));
     }
 }
