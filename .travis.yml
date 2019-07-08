@@ -8,6 +8,8 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
+install:
+  - ./gradlew assemble -x signArchives
 deploy:
   provider: script
   script: "./scripts/deploy.sh"
