@@ -1,11 +1,14 @@
 package com.monjam.core.history;
 
+import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.database.MongoTemplate;
+import com.monjam.core.rule.MongoReplicaSetRule;
 import com.monjam.core.rule.MongoRule;
 import org.bson.Document;
 import org.junit.After;
@@ -26,7 +29,7 @@ import static org.junit.Assert.assertThat;
 public class DbMigrationHistoryIT {
     private static final String SCHEMA_MIGRATIONS_COLLECTION = "schema_migrations";
     @ClassRule
-    public static final MongoRule MONGO_RULE = new MongoRule();
+    public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
     @Rule
     public ExpectedException exception = ExpectedException.none();
 
@@ -36,10 +39,12 @@ public class DbMigrationHistoryIT {
     @Before
     public void setup() {
         Configuration configuration = new Configuration();
-        MongoClient client = MongoClients.create("mongodb://localhost:12345");
+        MongoClient client = MongoClients.create("mongodb://localhost:27117");
+        ClientSession session = client.startSession();
+        MongoTemplate mongoTemplate = new MongoTemplate(client, session, "testdb");
         database = client.getDatabase("testdb");
         database.createCollection(SCHEMA_MIGRATIONS_COLLECTION);
-        migrationHistory = new DbMigrationHistory(database, configuration);
+        migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
     }
 
     @After
