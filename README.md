@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.oun:monjam-core:0.1.0'
+    compile 'io.github.oun:monjam-core:0.1.1'
 }
 
 monjam {
@@ -42,12 +42,17 @@ import com.monjam.core.api.Migration;
 public class V1__First_Migration implements Migration {
     @Override
     public void up(Context context) {
-        // TODO
+        // Run this when execute migrate
+        MongoDatabase database = context.getDatabase();
+        database.createCollection("my_collection");
+        ...
     }
 
     @Override
     public void down(Context context) {
-        // TODO
+        // Run this when execute rollback
+        database.createCollection("my_collection").drop();
+        ...
     }
 }
 ```
@@ -55,11 +60,6 @@ public class V1__First_Migration implements Migration {
 #### Migrate
 ```
 ./gradlew monjamMigrate
-```
-
-#### Rollback
-```
-./gradlew monjamRollback
 ```
 
 ### Configuration
