@@ -27,14 +27,14 @@ public abstract class Command {
     }
 
     public void execute() {
-        try (MongoClient mongoClient = createDbConnection(); ClientSession session = mongoClient.startSession()) {
-            MongoTemplate mongoTemplate = new MongoTemplate(mongoClient, session, configuration.getDatabase());
+        try (MongoClient client = createDbConnection(); ClientSession session = client.startSession()) {
+            MongoTemplate mongoTemplate = new MongoTemplate(client, session, configuration.getDatabase());
 
             MigrationHistory migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
             MigrationResolver migrationResolver = new JavaMigrationResolver(configuration);
 
-            MongoDatabase database = mongoClient.getDatabase(configuration.getDatabase());
-            Context context = new Context(database, session);
+            MongoDatabase database = client.getDatabase(configuration.getDatabase());
+            Context context = new Context(client, database, session, configuration);
             doExecute(context, migrationResolver, migrationHistory);
         } catch (Exception e) {
             LOG.error("Error while executing command", e);

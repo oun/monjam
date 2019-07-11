@@ -1,17 +1,22 @@
 # MonJam
 
-MongoDB migration 
+MongoDB migration
 
 ### Features
+- Gradle plugin
 - Java based migration
 - Run migration within transaction (MongoDB 4.0+)
+
+### Road Map
+- JS script based migration
+- Maven plugin
 
 ### Installation
 
 Add gradle plugin, dependency and configuration in your build.gradle.
 ```
 plugins {
-    id 'io.github.oun.monjam' version '0.1.1'
+    id 'io.github.oun.monjam' version '0.2.0'
 }
 
 repositories {
@@ -19,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.oun:monjam-core:0.1.1'
+    compile 'io.github.oun:monjam-core:0.2.0'
 }
 
 monjam {
@@ -32,7 +37,9 @@ monjam {
 
 ### Usage
 
-#### Create Java Migration
+#### Create Migration
+
+##### Java Migration
 ```java
 package db.migration;
 
@@ -42,7 +49,7 @@ import com.monjam.core.api.Migration;
 public class V1__First_Migration implements Migration {
     @Override
     public void up(Context context) {
-        // Run this when execute migrate
+        // Execute migrate
         MongoDatabase database = context.getDatabase();
         database.createCollection("my_collection");
         ...
@@ -50,17 +57,18 @@ public class V1__First_Migration implements Migration {
 
     @Override
     public void down(Context context) {
-        // Run this when execute rollback
+        // Execute rollback
         database.createCollection("my_collection").drop();
         ...
     }
 }
 ```
 
-#### Migrate
-```
-./gradlew monjamMigrate
-```
+#### Execute Migrate
+`./gradlew monjamMigrate`
+
+#### Execute Rollback
+`./gradlew monjamRollback`
 
 ### Configuration
 | name        | description                      | default |

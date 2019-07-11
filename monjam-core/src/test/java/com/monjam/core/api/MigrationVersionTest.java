@@ -1,7 +1,5 @@
 package com.monjam.core.api;
 
-import com.monjam.core.api.MigrationVersion;
-import com.monjam.core.api.MonJamException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

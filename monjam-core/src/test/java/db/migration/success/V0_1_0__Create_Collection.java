@@ -27,6 +27,8 @@ public class V0_1_0__Create_Collection implements Migration {
 
     @Override
     public void down(Context context) {
+        MongoDatabase database = context.getDatabase();
 
+        database.getCollection(COLLECTION).drop();
     }
 }
