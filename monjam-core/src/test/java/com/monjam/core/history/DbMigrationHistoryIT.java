@@ -3,13 +3,12 @@ package com.monjam.core.history;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Sorts;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.database.MongoTemplate;
 import com.monjam.core.rule.MongoReplicaSetRule;
-import com.monjam.core.rule.MongoRule;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -22,6 +21,7 @@ import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import static com.monjam.core.support.MongoUtils.findAll;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -85,12 +85,35 @@ public class DbMigrationHistoryIT {
 
         migrationHistory.addAppliedMigration(appliedMigration);
 
-        MongoCursor<Document> cursor = database.getCollection(SCHEMA_MIGRATIONS_COLLECTION).find().iterator();
-        assertThat(cursor.hasNext(), equalTo(true));
-        Document document = cursor.next();
-        assertThat(document.getString("version"), equalTo("1.0.0"));
-        assertThat(document.getString("description"), equalTo("Add fields"));
-        assertThat(document.getDate("executedAt"), equalTo(Date.from(ZonedDateTime.parse("2019-01-01T09:00:59+00:00").toInstant())));
+        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        assertThat(documents, hasSize(1));
+        assertThat(documents.get(0).getString("version"), equalTo("1.0.0"));
+        assertThat(documents.get(0).getString("description"), equalTo("Add fields"));
+        assertThat(documents.get(0).getDate("executedAt"), equalTo(Date.from(ZonedDateTime.parse("2019-01-01T09:00:59+00:00").toInstant())));
+    }
+
+    @Test
+    public void removeAppliedMigration() {
+        createDocument("0.1.0", "Hello", ZonedDateTime.parse("2019-01-01T09:00:59+00:00"));
+        createDocument("0.1.1", "Hi", ZonedDateTime.parse("2019-02-14T23:20:00+00:00"));
+        AppliedMigration appliedMigration = new AppliedMigration(new MigrationVersion("0.1.1"), "Hi", ZonedDateTime.parse("2019-02-14T23:20:00+00:00"));
+
+        migrationHistory.removeAppliedMigration(appliedMigration);
+
+        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        assertThat(documents, hasSize(1));
+        assertThat(documents.get(0).getString("version"), equalTo("0.1.0"));
+        assertThat(documents.get(0).getString("description"), equalTo("Hello"));
+    }
+
+    @Test
+    public void removeAppliedMigration_GivenEmptyMigrations() {
+        AppliedMigration appliedMigration = new AppliedMigration(new MigrationVersion("0.1.1"), "Hi", ZonedDateTime.parse("2019-02-14T23:20:00+00:00"));
+
+        migrationHistory.removeAppliedMigration(appliedMigration);
+
+        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        assertThat(documents, hasSize(0));
     }
 
     private void createDocument(String version, String description, ZonedDateTime executedAt) {

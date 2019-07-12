@@ -39,7 +39,7 @@ public class DbMigrate extends Command {
             if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
             }
-            LOG.info("Execute schema migration version {}", resolvedMigration.getVersion());
+            LOG.info("Execute up schema migration version {}", resolvedMigration.getVersion());
             new TransactionTemplate().executeInTransaction(context, ctx ->
                     applyMigration(ctx, resolvedMigration, migrationHistory)
             );

@@ -47,6 +47,10 @@ public class MongoTemplate {
         getCollection(collection).insertOne(session, mapper.apply(document));
     }
 
+    public <T> void delete(Bson filter, String collection) {
+        getCollection(collection).deleteMany(session, filter);
+    }
+
     private MongoCollection<Document> getCollection(String collection) {
         return database.getCollection(collection);
     }

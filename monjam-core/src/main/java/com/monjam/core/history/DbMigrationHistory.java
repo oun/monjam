@@ -15,8 +15,14 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import static com.mongodb.client.model.Filters.eq;
+
 public class DbMigrationHistory implements MigrationHistory {
     private static final Logger LOG = LoggerFactory.getLogger(DbMigrationHistory.class);
+
+    private static final String VERSION = "version";
+    private static final String DESCRIPTION = "description";
+    private static final String EXECUTED_AT = "executedAt";
 
     private final MongoTemplate mongoTemplate;
     private final Configuration configuration;
@@ -34,10 +40,10 @@ public class DbMigrationHistory implements MigrationHistory {
 
     @Override
     public List<AppliedMigration> getAppliedMigrations() {
-        Collection<AppliedMigration> appliedMigrations = mongoTemplate.findAll(Sorts.ascending("executedAt"), configuration.getCollection(), document -> new AppliedMigration(
-                new MigrationVersion(document.getString("version")),
-                document.getString("description"),
-                ZonedDateTime.ofInstant(document.getDate("executedAt").toInstant(), ZoneOffset.UTC.normalized())
+        Collection<AppliedMigration> appliedMigrations = mongoTemplate.findAll(Sorts.ascending(EXECUTED_AT), configuration.getCollection(), document -> new AppliedMigration(
+                new MigrationVersion(document.getString(VERSION)),
+                document.getString(DESCRIPTION),
+                ZonedDateTime.ofInstant(document.getDate(EXECUTED_AT).toInstant(), ZoneOffset.UTC.normalized())
         ));
         return new ArrayList<>(appliedMigrations);
     }
@@ -45,9 +51,14 @@ public class DbMigrationHistory implements MigrationHistory {
     @Override
     public void addAppliedMigration(AppliedMigration appliedMigration) {
         mongoTemplate.insert(appliedMigration, configuration.getCollection(), migration -> new Document()
-                .append("version", appliedMigration.getVersion().toString())
-                .append("description", appliedMigration.getDescription())
-                .append("executedAt", Date.from(appliedMigration.getExecutedAt().toInstant()))
+                .append(VERSION, appliedMigration.getVersion().toString())
+                .append(DESCRIPTION, appliedMigration.getDescription())
+                .append(EXECUTED_AT, Date.from(appliedMigration.getExecutedAt().toInstant()))
         );
+    }
+
+    @Override
+    public void removeAppliedMigration(AppliedMigration appliedMigration) {
+        mongoTemplate.delete(eq(VERSION, appliedMigration.getVersion().toString()), configuration.getCollection());
     }
 }

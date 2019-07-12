@@ -1,15 +1,24 @@
 package com.monjam.core.api;
 
 import com.mongodb.client.ClientSession;
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 public class Context {
+    private MongoClient client;
     private MongoDatabase database;
     private ClientSession session;
+    private Configuration configuration;
 
-    public Context(MongoDatabase database, ClientSession session) {
+    public Context(MongoClient client, MongoDatabase database, ClientSession session, Configuration configuration) {
+        this.client = client;
         this.database = database;
         this.session = session;
+        this.configuration = configuration;
+    }
+
+    public MongoClient getClient() {
+        return client;
     }
 
     public MongoDatabase getDatabase() {
@@ -18,5 +27,9 @@ public class Context {
 
     public ClientSession getSession() {
         return session;
+    }
+
+    public Configuration getConfiguration() {
+        return configuration;
     }
 }

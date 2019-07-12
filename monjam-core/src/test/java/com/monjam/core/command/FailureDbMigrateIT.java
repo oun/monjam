@@ -2,21 +2,20 @@ package com.monjam.core.command;
 
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static com.monjam.core.support.MongoUtils.findAll;
+import static com.monjam.core.support.MongoUtils.truncate;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -55,7 +54,7 @@ public class FailureDbMigrateIT {
     public void execute_GivenMigrationThrowError() {
         dbMigrate.execute();
 
-        List<Document> migrations = findAll(configuration.getCollection(), Sorts.ascending("executedAt"));
+        List<Document> migrations = findAll(database, configuration.getCollection(), Sorts.ascending("executedAt"));
         assertThat(migrations, hasSize(1));
         assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
         assertThat(migrations.get(0).getString("description"), equalTo("Create Collection"));
@@ -65,17 +64,5 @@ public class FailureDbMigrateIT {
         assertThat(document.getString("subject"), is(nullValue()));
         assertThat(document.getString("message"), equalTo("Sawasdee Earthling"));
         assertThat(document.getString("sender"), equalTo("Alien"));
-    }
-
-    private List<Document> findAll(String collectionName, Bson sort) {
-        List<Document> documents = new ArrayList<>();
-         try (MongoCursor<Document> cursor = database.getCollection(collectionName).find().sort(sort).iterator()) {
-             while (cursor.hasNext()) { documents.add(cursor.next()); }
-         }
-         return documents;
-    }
-
-    private void truncate(MongoDatabase database, String collectionName) {
-        database.getCollection(collectionName).deleteMany(new Document());
     }
 }

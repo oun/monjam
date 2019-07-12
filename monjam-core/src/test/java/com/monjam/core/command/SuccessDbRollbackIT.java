@@ -12,22 +12,27 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.monjam.core.support.MongoUtils.findAll;
 import static com.monjam.core.support.MongoUtils.insertFile;
 import static com.monjam.core.support.MongoUtils.truncate;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-public class SuccessDbMigrateIT {
+public class SuccessDbRollbackIT {
     @ClassRule
     public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
 
+    private static final String MESSAGES_COLLECTION = "messages";
+    private static final String MIGRATIONS_COLLECTION = "schema_migrations";
+
     private Configuration configuration;
     private MongoDatabase database;
-    private DbMigrate dbMigrate;
+    private DbRollback dbRollback;
 
     @Before
     public void setup() {
@@ -35,46 +40,37 @@ public class SuccessDbMigrateIT {
                 .location("db/migration/success")
                 .url("mongodb://localhost:27117")
                 .database("testdb")
-                .collection("schema_migrations")
+                .collection(MIGRATIONS_COLLECTION)
                 .build();
         MongoClient client = MongoClients.create("mongodb://localhost:27117");
         database = client.getDatabase("testdb");
-        dbMigrate = new DbMigrate(configuration);
+        dbRollback = new DbRollback(configuration);
     }
 
     @After
     public void teardown() {
-        truncate(database, configuration.getCollection());
-        database.getCollection("messages").drop();
-    }
-
-    @Test
-    public void execute_GivenEmptyAppliedMigrations() throws Exception {
-        dbMigrate.execute();
-
-        List<Document> migrations = findAll(database, configuration.getCollection(), Sorts.ascending("executedAt"));
-        assertThat(migrations, hasSize(2));
-        assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
-        assertThat(migrations.get(0).getString("description"), equalTo("Create Collection"));
-        assertThat(migrations.get(1).getString("version"), equalTo("0.2.0"));
-        assertThat(migrations.get(1).getString("description"), equalTo("Create Index"));
-
-        List<Document> messages = findAll(database,"messages", Sorts.ascending("time"));
-        assertThat(messages, hasSize(1));
-        assertThat(messages.get(0).getString("message"), equalTo("Sawasdee Earthling"));
-        assertThat(messages.get(0).getString("sender"), equalTo("Alien"));
+        truncate(database, MIGRATIONS_COLLECTION);
+        database.getCollection(MESSAGES_COLLECTION).drop();
     }
 
     @Test
     public void execute_GivenAppliedMigrations() throws Exception {
-        insertFile(database, configuration.getCollection(), "schema_migrations.json");
+        insertFile(database, MESSAGES_COLLECTION, "messages.json");
+        insertFile(database, MIGRATIONS_COLLECTION, "schema_migrations.json");
 
-        dbMigrate.execute();
+        dbRollback.execute();
 
         List<Document> migrations = findAll(database, configuration.getCollection(), Sorts.ascending("executedAt"));
-        assertThat(migrations, hasSize(2));
-        assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
-        assertThat(migrations.get(1).getString("version"), equalTo("0.2.0"));
-        assertThat(migrations.get(1).getString("description"), equalTo("Create Index"));
+        assertThat(migrations, hasSize(0));
+
+        assertThat(database.listCollectionNames().into(new ArrayList<>()), not(hasItem(MESSAGES_COLLECTION)));
+    }
+
+    @Test
+    public void execute_GivenEmptyAppliedMigrations() throws Exception {
+        dbRollback.execute();
+
+        List<Document> migrations = findAll(database, configuration.getCollection(), Sorts.ascending("executedAt"));
+        assertThat(migrations, hasSize(0));
     }
 }
