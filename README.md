@@ -1,4 +1,4 @@
-# MonJam
+# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam)
 
 MongoDB migration
 
