@@ -8,8 +8,11 @@ cache:
   directories:
   - "$HOME/.gradle/caches/"
   - "$HOME/.gradle/wrapper/"
-install:
-  - ./gradlew assemble -x signArchives
+script:
+  - ./gradlew check
+  - ./gradlew codeCoverageReport
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
 deploy:
   provider: script
   script: "./scripts/deploy.sh"
