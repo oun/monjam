@@ -1,4 +1,4 @@
-# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam)
+# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam) [![codecov](https://codecov.io/gh/oun/monjam/branch/master/graph/badge.svg)](https://codecov.io/gh/oun/monjam)
 
 MongoDB migration
 
@@ -52,14 +52,12 @@ public class V1__First_Migration implements Migration {
         // Execute migrate
         MongoDatabase database = context.getDatabase();
         database.createCollection("my_collection");
-        ...
     }
 
     @Override
     public void down(Context context) {
         // Execute rollback
         database.createCollection("my_collection").drop();
-        ...
     }
 }
 ```
