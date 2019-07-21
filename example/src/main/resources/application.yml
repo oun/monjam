@@ -1,0 +1,8 @@
+server:
+  port: 9080
+spring:
+  application:
+    name: monjam-spring-example
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/monjam_example
