@@ -25,12 +25,6 @@ allprojects {
 subprojects {
     group = 'io.github.oun'
     version = '0.2.0'
-
-    sonarqube {
-        properties {
-            property "sonar.sources", "src"
-        }
-    }
 }
 
 task codeCoverageReport(type: JacocoReport) {
