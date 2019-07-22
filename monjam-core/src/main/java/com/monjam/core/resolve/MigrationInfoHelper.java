@@ -8,7 +8,7 @@ public class MigrationInfoHelper {
             throw new IllegalArgumentException("Migration name must not be null");
         }
         String[] parts = migrationName.split("__");
-        if (parts.length < 1) {
+        if (parts.length < 2) {
             throw new MonJamException("Migration name should have version and description");
         }
         if (!parts[0].startsWith("V")) {

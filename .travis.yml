@@ -13,6 +13,7 @@ install:
 script:
   - ./gradlew check
   - ./gradlew codeCoverageReport
+  - ./gradlew sonarqube
 after_success:
   - bash <(curl -s https://codecov.io/bash)
 deploy:

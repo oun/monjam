@@ -13,6 +13,13 @@ allprojects {
         mavenCentral()
         jcenter()
     }
+
+    sonarqube {
+        properties {
+            property "sonar.projectKey", "oun_monjam"
+            property "sonar.sourceEncoding", "UTF-8"
+        }
+    }
 }
 
 subprojects {
@@ -21,7 +28,7 @@ subprojects {
 
     sonarqube {
         properties {
-            sonar.projectKey = oun_monjam
+            property "sonar.sources", "src"
         }
     }
 }

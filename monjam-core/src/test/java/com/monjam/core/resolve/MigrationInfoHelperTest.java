@@ -27,20 +27,20 @@ public class MigrationInfoHelperTest {
     public void extract_GivenVersionAndBlankDescription() {
         String migrationName = "V1_2_3__";
 
-        MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
+        exception.expect(MonJamException.class);
+        exception.expectMessage("Migration name should have version and description");
 
-        assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.2.3")));
-        assertThat(migrationInfo.getDescription(), equalTo(""));
+        MigrationInfoHelper.extract(migrationName);
     }
 
     @Test
-    public void extract_GivenVersion() {
+    public void extract_WithoutDescription() {
         String migrationName = "V1_2_3";
 
-        MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
+        exception.expect(MonJamException.class);
+        exception.expectMessage("Migration name should have version and description");
 
-        assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.2.3")));
-        assertThat(migrationInfo.getDescription(), equalTo(""));
+        MigrationInfoHelper.extract(migrationName);
     }
 
     @Test
@@ -78,7 +78,17 @@ public class MigrationInfoHelperTest {
         String migrationName = "Hello_world";
 
         exception.expect(MonJamException.class);
-        exception.expectMessage("Migration version should have prefix 'V'");
+        exception.expectMessage("Migration name should have version and description");
+
+        MigrationInfoHelper.extract(migrationName);
+    }
+
+    @Test
+    public void extract_GivenNull() {
+        String migrationName = null;
+
+        exception.expect(IllegalArgumentException.class);
+        exception.expectMessage("Migration name must not be null");
 
         MigrationInfoHelper.extract(migrationName);
     }
