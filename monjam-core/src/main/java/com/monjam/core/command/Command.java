@@ -9,8 +9,7 @@ import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MonJamException;
-import com.monjam.core.database.MongoTemplate;
-import com.monjam.core.database.SessionMongoTemplate;
+import com.monjam.core.database.DbTemplate;
 import com.monjam.core.history.DbMigrationHistory;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.JavaMigrationResolver;
@@ -28,13 +27,11 @@ public abstract class Command {
     }
 
     public void execute() {
-        ClientSession session = null;
-        try (MongoClient client = createDbConnection()) {
-            session = startSession(client);
+        try (MongoClient client = createDbConnection(); ClientSession session = startSession(client)) {
             boolean supportTransaction = session != null;
-            MongoTemplate mongoTemplate = createMongoTemplate(client, session, configuration);
+            DbTemplate dbTemplate = new DbTemplate(client, session, configuration.getDatabase());
 
-            MigrationHistory migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
+            MigrationHistory migrationHistory = new DbMigrationHistory(dbTemplate, configuration);
             MigrationResolver migrationResolver = new JavaMigrationResolver(configuration);
 
             MongoDatabase database = client.getDatabase(configuration.getDatabase());
@@ -42,18 +39,6 @@ public abstract class Command {
             doExecute(context, migrationResolver, migrationHistory);
         } catch (Exception e) {
             LOG.error("Error while executing command", e);
-        } finally {
-            if (session != null) {
-                session.close();
-            }
-        }
-    }
-
-    private MongoTemplate createMongoTemplate(MongoClient client, ClientSession session, Configuration configuration) {
-        if (session == null) {
-            return new MongoTemplate(client, configuration.getDatabase());
-        } else {
-            return new SessionMongoTemplate(client, session, configuration.getDatabase());
         }
     }
 
@@ -61,6 +46,7 @@ public abstract class Command {
         try {
             return client.startSession();
         } catch (Exception e) {
+            LOG.info("Mongo connection does not support transaction", e);
             return null;
         }
     }

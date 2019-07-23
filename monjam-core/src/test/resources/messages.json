@@ -1,8 +1,0 @@
-[
-  {
-    "_id": {"$oid": "5d1c7aa40130ca121404a176"},
-    "message": "Sawasdee Earthling",
-    "sender": "Alien",
-    "time": {"$date": "2019-07-01T09:50:00.000Z"}
-  }
-]
