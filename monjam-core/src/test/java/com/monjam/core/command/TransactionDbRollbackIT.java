@@ -23,7 +23,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
-public class SuccessDbRollbackIT {
+public class TransactionDbRollbackIT {
     @ClassRule
     public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
 
@@ -38,11 +38,11 @@ public class SuccessDbRollbackIT {
     public void setup() {
         configuration = Configuration.builder()
                 .location("db/migration/success")
-                .url("mongodb://localhost:27117")
+                .url("mongodb://localhost:27117/?replicaSet=rs0")
                 .database("testdb")
                 .collection(MIGRATIONS_COLLECTION)
                 .build();
-        MongoClient client = MongoClients.create("mongodb://localhost:27117");
+        MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbRollback = new DbRollback(configuration);
     }

@@ -10,6 +10,7 @@ import com.monjam.core.api.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MonJamException;
 import com.monjam.core.database.MongoTemplate;
+import com.monjam.core.database.SessionMongoTemplate;
 import com.monjam.core.history.DbMigrationHistory;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.JavaMigrationResolver;
@@ -27,17 +28,40 @@ public abstract class Command {
     }
 
     public void execute() {
-        try (MongoClient client = createDbConnection(); ClientSession session = client.startSession()) {
-            MongoTemplate mongoTemplate = new MongoTemplate(client, session, configuration.getDatabase());
+        ClientSession session = null;
+        try (MongoClient client = createDbConnection()) {
+            session = startSession(client);
+            boolean supportTransaction = session != null;
+            MongoTemplate mongoTemplate = createMongoTemplate(client, session, configuration);
 
             MigrationHistory migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
             MigrationResolver migrationResolver = new JavaMigrationResolver(configuration);
 
             MongoDatabase database = client.getDatabase(configuration.getDatabase());
-            Context context = new Context(client, database, session, configuration);
+            Context context = new Context(client, database, session, configuration, supportTransaction);
             doExecute(context, migrationResolver, migrationHistory);
         } catch (Exception e) {
             LOG.error("Error while executing command", e);
+        } finally {
+            if (session != null) {
+                session.close();
+            }
+        }
+    }
+
+    private MongoTemplate createMongoTemplate(MongoClient client, ClientSession session, Configuration configuration) {
+        if (session == null) {
+            return new MongoTemplate(client, configuration.getDatabase());
+        } else {
+            return new SessionMongoTemplate(client, session, configuration.getDatabase());
+        }
+    }
+
+    private ClientSession startSession(MongoClient client) {
+        try {
+            return client.startSession();
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -19,9 +19,12 @@ import static com.monjam.core.support.MongoUtils.insertFile;
 import static com.monjam.core.support.MongoUtils.truncate;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-public class SuccessDbMigrateIT {
+public class TransactionDbMigrateIT {
     @ClassRule
     public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
 
@@ -33,11 +36,11 @@ public class SuccessDbMigrateIT {
     public void setup() {
         configuration = Configuration.builder()
                 .location("db/migration/success")
-                .url("mongodb://localhost:27117")
+                .url("mongodb://localhost:27117/?replicaSet=rs0")
                 .database("testdb")
                 .collection("schema_migrations")
                 .build();
-        MongoClient client = MongoClients.create("mongodb://localhost:27117");
+        MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbMigrate = new DbMigrate(configuration);
     }
@@ -76,5 +79,31 @@ public class SuccessDbMigrateIT {
         assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
         assertThat(migrations.get(1).getString("version"), equalTo("0.2.0"));
         assertThat(migrations.get(1).getString("description"), equalTo("Create Index"));
+    }
+
+    @Test
+    public void execute_GivenMigrationThrowError() {
+        configuration = Configuration.builder()
+                .location("db/migration/success,db/migration/failure")
+                .url("mongodb://localhost:27117/?replicaSet=rs0")
+                .database("testdb")
+                .collection("schema_migrations")
+                .build();
+        MongoClient client = MongoClients.create(configuration.getUrl());
+        database = client.getDatabase("testdb");
+        dbMigrate = new DbMigrate(configuration);
+
+        dbMigrate.execute();
+
+        List<Document> migrations = findAll(database, configuration.getCollection(), Sorts.ascending("executedAt"));
+        assertThat(migrations, hasSize(1));
+        assertThat(migrations.get(0).getString("version"), equalTo("0.1.0"));
+        assertThat(migrations.get(0).getString("description"), equalTo("Create Collection"));
+
+        Document document = database.getCollection("messages").find().first();
+        assertThat(document, is(notNullValue()));
+        assertThat(document.getString("subject"), is(nullValue()));
+        assertThat(document.getString("message"), equalTo("Sawasdee Earthling"));
+        assertThat(document.getString("sender"), equalTo("Alien"));
     }
 }

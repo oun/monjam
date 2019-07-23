@@ -59,6 +59,6 @@ public class DbMigrationHistory implements MigrationHistory {
 
     @Override
     public void removeAppliedMigration(AppliedMigration appliedMigration) {
-        mongoTemplate.delete(eq(VERSION, appliedMigration.getVersion().toString()), configuration.getCollection());
+        mongoTemplate.deleteMany(configuration.getCollection(), eq(VERSION, appliedMigration.getVersion().toString()));
     }
 }

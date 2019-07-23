@@ -18,6 +18,8 @@ public class V0_2_0__Create_Index implements Migration {
 
     @Override
     public void down(Context context) {
+        MongoDatabase database = context.getDatabase();
 
+        database.getCollection(COLLECTION).dropIndex(ascending("time"));
     }
 }

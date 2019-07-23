@@ -40,15 +40,18 @@ public class DbMigrate extends Command {
                 continue;
             }
             LOG.info("Execute up schema migration version {}", resolvedMigration.getVersion());
-            new TransactionTemplate().executeInTransaction(context, ctx ->
-                    applyMigration(ctx, resolvedMigration, migrationHistory)
-            );
+            if (context.isSupportTransaction()) {
+                new TransactionTemplate().executeInTransaction(context, ctx ->
+                        applyMigration(ctx, resolvedMigration, migrationHistory)
+                );
+            } else {
+                applyMigration(context, resolvedMigration, migrationHistory);
+            }
         }
     }
 
-    private void applyMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
+    public void applyMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
         resolvedMigration.getExecutor().executeUp(context);
-
         migrationHistory.addAppliedMigration(new AppliedMigration(
                 resolvedMigration.getVersion(),
                 resolvedMigration.getDescription(),

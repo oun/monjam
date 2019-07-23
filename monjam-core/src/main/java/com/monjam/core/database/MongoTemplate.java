@@ -1,8 +1,7 @@
 package com.monjam.core.database;
 
-import com.mongodb.client.ClientSession;
+import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -19,11 +18,9 @@ public class MongoTemplate {
     private static final Logger LOG = LoggerFactory.getLogger(MongoTemplate.class);
 
     private final MongoDatabase database;
-    private final ClientSession session;
 
-    public MongoTemplate(MongoClient mongoClient, ClientSession session, String database) {
+    public MongoTemplate(MongoClient mongoClient, String database) {
         this.database = mongoClient.getDatabase(database);
-        this.session = session;
     }
 
     public void createCollectionIfNotExists(String collection) {
@@ -35,7 +32,7 @@ public class MongoTemplate {
 
     public <T> Collection<T> findAll(Bson sort, String collection, Function<Document, T> mapper) {
         List<T> results = new ArrayList<>();
-        try (MongoCursor<Document> cursor = getCollection(collection).find(session).sort(sort).iterator()) {
+        try (MongoCursor<Document> cursor = doFind(collection).sort(sort).iterator()) {
             while (cursor.hasNext()) {
                 results.add(mapper.apply(cursor.next()));
             }
@@ -43,15 +40,23 @@ public class MongoTemplate {
         return results;
     }
 
+    protected FindIterable doFind(String collection) {
+        return database.getCollection(collection).find();
+    }
+
     public <T> void insert(T document, String collection, Function<T, Document> mapper) {
-        getCollection(collection).insertOne(session, mapper.apply(document));
+        doInsertOne(collection, mapper.apply(document));
     }
 
-    public <T> void delete(Bson filter, String collection) {
-        getCollection(collection).deleteMany(session, filter);
+    protected void doInsertOne(String collection, Document document) {
+        database.getCollection(collection).insertOne(document);
     }
 
-    private MongoCollection<Document> getCollection(String collection) {
-        return database.getCollection(collection);
+    public <T> void deleteMany(String collection, Bson filter) {
+        doDeleteMany(collection, filter);
+    }
+
+    protected void doDeleteMany(String collection, Bson filter) {
+        database.getCollection(collection).deleteMany(filter);
     }
 }

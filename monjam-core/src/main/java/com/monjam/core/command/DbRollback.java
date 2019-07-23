@@ -40,14 +40,17 @@ public class DbRollback extends Command {
                 .findFirst()
                 .orElseThrow(() -> new MonJamException("Could not execute rollback migration version " + lastAppliedMigration.getVersion() + ". Migration not found"));
         LOG.info("Execute down schema migration version {}", resolvedMigration.getVersion());
-        new TransactionTemplate().executeInTransaction(context, ctx ->
-                revertMigration(ctx, resolvedMigration, migrationHistory)
-        );
+        if (context.isSupportTransaction()) {
+            new TransactionTemplate().executeInTransaction(context, ctx ->
+                    revertMigration(context, resolvedMigration, migrationHistory)
+            );
+        } else {
+            revertMigration(context, resolvedMigration, migrationHistory);
+        }
     }
 
-    private void revertMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
+    public void revertMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
         resolvedMigration.getExecutor().executeDown(context);
-
         migrationHistory.removeAppliedMigration(new AppliedMigration(
                 resolvedMigration.getVersion(),
                 resolvedMigration.getDescription(),

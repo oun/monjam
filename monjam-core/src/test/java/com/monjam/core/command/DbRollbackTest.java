@@ -60,7 +60,7 @@ public class DbRollbackTest {
     public void setup() {
         command = new DbRollback(new Configuration());
         mockStatic(ZonedDateTime.class);
-        context = new Context(client, database, session, new Configuration());
+        context = new Context(client, database, session, new Configuration(), true);
     }
 
     @Test

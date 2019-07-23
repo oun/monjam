@@ -2,7 +2,7 @@ package com.monjam.core.support;
 
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.command.SuccessDbMigrateIT;
+import com.monjam.core.command.TransactionDbMigrateIT;
 import org.bson.BsonArray;
 import org.bson.BsonDocument;
 import org.bson.BsonValue;
@@ -27,7 +27,7 @@ public class MongoUtils {
     }
 
     public static void insertFile(MongoDatabase database, String collectionName, String filePath) throws Exception {
-        Path path = Paths.get(SuccessDbMigrateIT.class.getClassLoader().getResource(filePath).toURI());
+        Path path = Paths.get(TransactionDbMigrateIT.class.getClassLoader().getResource(filePath).toURI());
         for (BsonValue value : BsonArray.parse(new String(Files.readAllBytes(path)))) {
             database.getCollection(collectionName, BsonDocument.class).insertOne(value.asDocument());
         }

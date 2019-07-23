@@ -41,7 +41,7 @@ public class DbMigrationHistoryIT {
         Configuration configuration = new Configuration();
         MongoClient client = MongoClients.create("mongodb://localhost:27117");
         ClientSession session = client.startSession();
-        MongoTemplate mongoTemplate = new MongoTemplate(client, session, "testdb");
+        MongoTemplate mongoTemplate = new MongoTemplate(client, "testdb");
         database = client.getDatabase("testdb");
         database.createCollection(SCHEMA_MIGRATIONS_COLLECTION);
         migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
