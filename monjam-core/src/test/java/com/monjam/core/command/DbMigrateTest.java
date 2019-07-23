@@ -58,7 +58,7 @@ public class DbMigrateTest {
     public void setup() {
         command = new DbMigrate(new Configuration());
         mockStatic(ZonedDateTime.class);
-        context = new Context(client, database, session, new Configuration());
+        context = new Context(client, database, session, new Configuration(), true);
     }
 
     @Test

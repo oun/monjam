@@ -9,12 +9,14 @@ public class Context {
     private MongoDatabase database;
     private ClientSession session;
     private Configuration configuration;
+    private boolean supportTransaction;
 
-    public Context(MongoClient client, MongoDatabase database, ClientSession session, Configuration configuration) {
+    public Context(MongoClient client, MongoDatabase database, ClientSession session, Configuration configuration, boolean supportTransaction) {
         this.client = client;
         this.database = database;
         this.session = session;
         this.configuration = configuration;
+        this.supportTransaction = supportTransaction;
     }
 
     public MongoClient getClient() {
@@ -31,5 +33,9 @@ public class Context {
 
     public Configuration getConfiguration() {
         return configuration;
+    }
+
+    public boolean isSupportTransaction() {
+        return supportTransaction;
     }
 }

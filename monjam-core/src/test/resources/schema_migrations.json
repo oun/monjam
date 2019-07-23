@@ -1,7 +1,7 @@
 [
   {
     "version": "0.1.0",
-    "description": "Create Collection",
+    "description": "Add prefix to user",
     "executedAt": {
       "$date": "2019-06-20T10:59:20Z"
     }

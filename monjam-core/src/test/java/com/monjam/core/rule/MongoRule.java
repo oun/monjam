@@ -33,7 +33,7 @@ public class MongoRule implements TestRule {
 
     private void startServer() throws Exception {
         mongodExecutable = starter.prepare(new MongodConfigBuilder()
-                .version(Version.Main.PRODUCTION)
+                .version(Version.Main.LEGACY)
                 .net(new Net("localhost", 12345, Network.localhostIsIPv6()))
                 .build());
         mongodProcess = mongodExecutable.start();

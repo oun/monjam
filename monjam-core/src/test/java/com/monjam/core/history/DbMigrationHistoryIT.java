@@ -7,7 +7,7 @@ import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.MigrationVersion;
-import com.monjam.core.database.MongoTemplate;
+import com.monjam.core.database.DbTemplate;
 import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.Document;
 import org.junit.After;
@@ -21,7 +21,7 @@ import java.sql.Date;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static com.monjam.core.support.MongoUtils.findAll;
+import static com.monjam.core.support.MongoUtils.find;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
@@ -41,10 +41,10 @@ public class DbMigrationHistoryIT {
         Configuration configuration = new Configuration();
         MongoClient client = MongoClients.create("mongodb://localhost:27117");
         ClientSession session = client.startSession();
-        MongoTemplate mongoTemplate = new MongoTemplate(client, session, "testdb");
+        DbTemplate dbTemplate = new DbTemplate(client, session, "testdb");
         database = client.getDatabase("testdb");
         database.createCollection(SCHEMA_MIGRATIONS_COLLECTION);
-        migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
+        migrationHistory = new DbMigrationHistory(dbTemplate, configuration);
     }
 
     @After
@@ -85,7 +85,7 @@ public class DbMigrationHistoryIT {
 
         migrationHistory.addAppliedMigration(appliedMigration);
 
-        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        List<Document> documents = find(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
         assertThat(documents, hasSize(1));
         assertThat(documents.get(0).getString("version"), equalTo("1.0.0"));
         assertThat(documents.get(0).getString("description"), equalTo("Add fields"));
@@ -100,7 +100,7 @@ public class DbMigrationHistoryIT {
 
         migrationHistory.removeAppliedMigration(appliedMigration);
 
-        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        List<Document> documents = find(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
         assertThat(documents, hasSize(1));
         assertThat(documents.get(0).getString("version"), equalTo("0.1.0"));
         assertThat(documents.get(0).getString("description"), equalTo("Hello"));
@@ -112,7 +112,7 @@ public class DbMigrationHistoryIT {
 
         migrationHistory.removeAppliedMigration(appliedMigration);
 
-        List<Document> documents = findAll(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
+        List<Document> documents = find(database, SCHEMA_MIGRATIONS_COLLECTION, Sorts.descending("executedAt"));
         assertThat(documents, hasSize(0));
     }
 

@@ -9,7 +9,7 @@ import com.mongodb.client.MongoDatabase;
 import com.monjam.core.api.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MonJamException;
-import com.monjam.core.database.MongoTemplate;
+import com.monjam.core.database.DbTemplate;
 import com.monjam.core.history.DbMigrationHistory;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.JavaMigrationResolver;
@@ -27,17 +27,27 @@ public abstract class Command {
     }
 
     public void execute() {
-        try (MongoClient client = createDbConnection(); ClientSession session = client.startSession()) {
-            MongoTemplate mongoTemplate = new MongoTemplate(client, session, configuration.getDatabase());
+        try (MongoClient client = createDbConnection(); ClientSession session = startSession(client)) {
+            boolean supportTransaction = session != null;
+            DbTemplate dbTemplate = new DbTemplate(client, session, configuration.getDatabase());
 
-            MigrationHistory migrationHistory = new DbMigrationHistory(mongoTemplate, configuration);
+            MigrationHistory migrationHistory = new DbMigrationHistory(dbTemplate, configuration);
             MigrationResolver migrationResolver = new JavaMigrationResolver(configuration);
 
             MongoDatabase database = client.getDatabase(configuration.getDatabase());
-            Context context = new Context(client, database, session, configuration);
+            Context context = new Context(client, database, session, configuration, supportTransaction);
             doExecute(context, migrationResolver, migrationHistory);
         } catch (Exception e) {
             LOG.error("Error while executing command", e);
+        }
+    }
+
+    private ClientSession startSession(MongoClient client) {
+        try {
+            return client.startSession();
+        } catch (Exception e) {
+            LOG.info("Mongo connection does not support transaction", e);
+            return null;
         }
     }
 

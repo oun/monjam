@@ -1,0 +1,22 @@
+[
+  {
+    "_id": {"$oid": "5d1c7aa40130ca121404a176"},
+    "username": "oun",
+    "firstName": "Worawat",
+    "lastName": "Wijarn",
+    "age": 30,
+    "gender": "M",
+    "nickname": "Oun",
+    "createdDate": {"$date": "2019-07-01T09:50:00.000Z"}
+  },
+  {
+    "_id": {"$oid": "5d347d63376b144f69c8465d"},
+    "username": "palm",
+    "firstName": "Nattha",
+    "lastName": "Palmy",
+    "age": 20,
+    "gender": "F",
+    "nickname": "Palm",
+    "createdDate": {"$date": "2019-07-02T09:50:00.000Z"}
+  }
+]

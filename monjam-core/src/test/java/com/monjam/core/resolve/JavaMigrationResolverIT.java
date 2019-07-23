@@ -26,11 +26,14 @@ public class JavaMigrationResolverIT {
     public void resolveMigrations() {
         List<ResolvedMigration> migrations = migrationResolver.resolveMigrations();
 
-        assertThat(migrations, hasSize(2));
+        assertThat(migrations, hasSize(3));
         assertThat(migrations.get(0).getVersion(), equalTo(new MigrationVersion("0.1.0")));
-        assertThat(migrations.get(0).getDescription(), equalTo("Create Collection"));
+        assertThat(migrations.get(0).getDescription(), equalTo("Add prefix to user"));
 
         assertThat(migrations.get(1).getVersion(), equalTo(new MigrationVersion("0.2.0")));
-        assertThat(migrations.get(1).getDescription(), equalTo("Create Index"));
+        assertThat(migrations.get(1).getDescription(), equalTo("Remove nickname from user"));
+
+        assertThat(migrations.get(2).getVersion(), equalTo(new MigrationVersion("0.3.0")));
+        assertThat(migrations.get(2).getDescription(), equalTo("Update user gender"));
     }
 }

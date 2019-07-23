@@ -2,7 +2,6 @@ package com.monjam.core.database;
 
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
@@ -15,13 +14,13 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-public class MongoTemplate {
-    private static final Logger LOG = LoggerFactory.getLogger(MongoTemplate.class);
+public class DbTemplate {
+    private static final Logger LOG = LoggerFactory.getLogger(DbTemplate.class);
 
     private final MongoDatabase database;
     private final ClientSession session;
 
-    public MongoTemplate(MongoClient mongoClient, ClientSession session, String database) {
+    public DbTemplate(MongoClient mongoClient, ClientSession session, String database) {
         this.database = mongoClient.getDatabase(database);
         this.session = session;
     }
@@ -33,9 +32,9 @@ public class MongoTemplate {
         }
     }
 
-    public <T> Collection<T> findAll(Bson sort, String collection, Function<Document, T> mapper) {
+    public <T> Collection<T> find(Bson sort, String collectionName, Function<Document, T> mapper) {
         List<T> results = new ArrayList<>();
-        try (MongoCursor<Document> cursor = getCollection(collection).find(session).sort(sort).iterator()) {
+        try (MongoCursor<Document> cursor = collection(collectionName).find(sort).iterator()) {
             while (cursor.hasNext()) {
                 results.add(mapper.apply(cursor.next()));
             }
@@ -43,15 +42,21 @@ public class MongoTemplate {
         return results;
     }
 
-    public <T> void insert(T document, String collection, Function<T, Document> mapper) {
-        getCollection(collection).insertOne(session, mapper.apply(document));
+    public <T> void insert(T document, String collectionName, Function<T, Document> mapper) {
+        collection(collectionName).insertOne(mapper.apply(document));
     }
 
-    public <T> void delete(Bson filter, String collection) {
-        getCollection(collection).deleteMany(session, filter);
+    public void update(String collectionName, Bson filter, Bson update) {
+        collection(collectionName).updateMany(filter, update);
     }
 
-    private MongoCollection<Document> getCollection(String collection) {
-        return database.getCollection(collection);
+    public <T> void delete(String collectionName, Bson filter) {
+        collection(collectionName).deleteMany(filter);
+    }
+
+    private DbCollection collection(String collectionName) {
+        return session != null
+                ? new SessionDbCollection(database, session, collectionName)
+                : new LegacyDbCollection(database, collectionName);
     }
 }
