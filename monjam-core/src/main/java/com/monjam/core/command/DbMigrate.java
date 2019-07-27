@@ -1,6 +1,6 @@
 package com.monjam.core.command;
 
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.database.TransactionTemplate;

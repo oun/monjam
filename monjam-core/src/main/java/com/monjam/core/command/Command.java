@@ -2,11 +2,12 @@ package com.monjam.core.command;
 
 import com.mongodb.ConnectionString;
 import com.mongodb.MongoClientSettings;
+import com.mongodb.MongoCredential;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MonJamException;
 import com.monjam.core.database.DbTemplate;
@@ -56,11 +57,13 @@ public abstract class Command {
             throw new MonJamException("Could not find database connection url");
         }
 
-        return MongoClients.create(MongoClientSettings.builder()
-                .applyConnectionString(new ConnectionString(configuration.getUrl()))
-//                .credential(MongoCredential.createCredential(configuration.getUsername(), "admin", configuration.getPassword().toCharArray()))
-                .build()
-        );
+        MongoClientSettings.Builder clientSettingsBuilder = MongoClientSettings.builder()
+                .applyConnectionString(new ConnectionString(configuration.getUrl()));
+        if (configuration.getUsername() != null) {
+            clientSettingsBuilder.credential(MongoCredential.createCredential(configuration.getUsername(), configuration.getAuthDatabase(), configuration.getPassword().toCharArray()));
+        }
+
+        return MongoClients.create(clientSettingsBuilder.build());
     }
 
     protected abstract void doExecute(Context context, MigrationResolver migrationResolver, MigrationHistory migrationHistory);

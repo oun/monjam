@@ -1,8 +1,9 @@
 package com.monjam.gradle.task;
 
 import com.monjam.core.Monjam;
-import com.monjam.core.api.Configuration;
 import com.monjam.core.api.MonJamException;
+import com.monjam.core.configuration.Configuration;
+import com.monjam.core.configuration.ConfigurationUtils;
 import com.monjam.gradle.MonjamExtension;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.FileCollection;
@@ -32,23 +33,26 @@ public abstract class AbstractMonjamTask extends DefaultTask {
     @TaskAction
     public void run() {
         try {
-            Set<URL> urls = new HashSet<>();
-            addClassesAndResourcesDirs(urls);
-
-            ClassLoader classLoader = new URLClassLoader(
-                    urls.toArray(new URL[0]),
-                    getProject().getBuildscript().getClassLoader());
-            Configuration configuration = Configuration.builder()
-                    .classLoader(classLoader)
-                    .url(extension.getUrl())
-                    .location(extension.getLocation())
-                    .collection(extension.getCollection())
-                    .database(extension.getDatabase())
-                    .build();
+            Configuration configuration = createConfiguration();
+            getLogger().info("Loaded configuration " + configuration);
             run(new Monjam(configuration));
         } catch (Exception e) {
             throw new MonJamException("Error occurred while executing " + getName(), e);
         }
+    }
+
+    private Configuration createConfiguration() throws Exception {
+        Set<URL> urls = new HashSet<>();
+        addClassesAndResourcesDirs(urls);
+
+        ClassLoader classLoader = new URLClassLoader(
+                urls.toArray(new URL[0]),
+                getProject().getBuildscript().getClassLoader());
+        Configuration configuration = new Configuration();
+        configuration.setClassLoader(classLoader);
+        ConfigurationUtils.populate(configuration, extension);
+        ConfigurationUtils.populate(configuration, getProject().getProperties());
+        return configuration;
     }
 
     private void addClassesAndResourcesDirs(Set<URL> extraURLs) throws Exception {

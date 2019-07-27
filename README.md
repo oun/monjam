@@ -40,13 +40,14 @@ monjam {
 #### Create Migration
 
 ##### Java Migration
+
 ```java
 package db.migration;
 
 import com.monjam.core.api.Context;
 import com.monjam.core.api.Migration;
 
-public class V1__First_Migration implements Migration {
+public class V1_0_0__First_Migration implements Migration {
     @Override
     public void up(Context context) {
         // Execute migrate
@@ -62,6 +63,13 @@ public class V1__First_Migration implements Migration {
 }
 ```
 
+##### File Name Pattern
+{Prefix}{Version}__{Description}
+- Prefix: V for versioned migration
+- Version: Sem-ver format separated each part with underscored
+- Separator: two underscores
+- Description: Underscores separated words
+
 #### Execute Migrate
 `./gradlew monjamMigrate`
 
@@ -69,9 +77,25 @@ public class V1__First_Migration implements Migration {
 `./gradlew monjamRollback`
 
 ### Configuration
+
+Configuration can be defined in build.gradle.
+```
+monjam {
+    url = 'mongodb://localhost:27017/?replicaSet=rs0'
+    database = 'monjam'
+    collection = 'schema_migrations'
+    location = 'db/migration'
+}
+```
+or using gradle properties passed directly via command-line.
+`./gradlew monjamMigrate -Pmonjam.username=admin -Pmonjam.password=secret`
+
 | name        | description                      | default |
 |-------------|----------------------------------|---------|
 | url         | Connection url                   | -       |
 | database    | Database name                    | -       |
+| username    | Username                         | -       |
+| password    | Password                         | -       |
+| authDatabase | Authentication database name    | admin   |
 | collection  | Collection that store applied schema migrations | schema_migrations |
 | location    | Schema migration files location  | db/migration |

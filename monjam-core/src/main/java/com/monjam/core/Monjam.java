@@ -1,6 +1,6 @@
 package com.monjam.core;
 
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.command.Command;
 import com.monjam.core.command.DbMigrate;
 import com.monjam.core.command.DbRollback;

@@ -5,7 +5,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.database.DbTemplate;
 import com.monjam.core.rule.MongoReplicaSetRule;

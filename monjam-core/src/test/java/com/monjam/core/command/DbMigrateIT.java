@@ -4,7 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.rule.MongoRule;
 import org.bson.Document;
 import org.junit.After;
@@ -33,12 +33,11 @@ public class DbMigrateIT {
 
     @Before
     public void setup() throws Exception {
-        configuration = Configuration.builder()
-                .location("db/migration/success")
-                .url("mongodb://localhost:12345")
-                .database("testdb")
-                .collection("schema_migrations")
-                .build();
+        configuration = new Configuration();
+        configuration.setLocation("db/migration/success");
+        configuration.setUrl("mongodb://localhost:12345");
+        configuration.setDatabase("testdb");
+        configuration.setCollection("schema_migrations");
         MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbMigrate = new DbMigrate(configuration);
