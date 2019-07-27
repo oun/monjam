@@ -1,7 +1,7 @@
 package com.monjam.core.resolve;
 
-import com.monjam.core.api.Configuration;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.configuration.Configuration;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,9 +16,8 @@ public class JavaMigrationResolverIT {
 
     @Before
     public void setup() {
-        Configuration configuration = Configuration.builder()
-                .location("db/migration/success")
-                .build();
+        Configuration configuration = new Configuration();
+        configuration.setLocation("db/migration/success");
         migrationResolver = new JavaMigrationResolver(configuration);
     }
 

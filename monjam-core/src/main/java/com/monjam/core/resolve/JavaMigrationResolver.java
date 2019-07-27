@@ -1,6 +1,6 @@
 package com.monjam.core.resolve;
 
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Migration;
 import com.monjam.core.api.MonJamException;
 import io.github.classgraph.ClassGraph;

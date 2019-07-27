@@ -1,7 +1,7 @@
 package com.monjam.core.history;
 
 import com.mongodb.client.model.Sorts;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.database.DbTemplate;
 import org.bson.Document;

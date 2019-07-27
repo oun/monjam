@@ -4,7 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.Document;
 import org.junit.After;
@@ -33,12 +33,11 @@ public class TransactionDbMigrateIT {
 
     @Before
     public void setup() throws Exception {
-        configuration = Configuration.builder()
-                .location("db/migration/success")
-                .url("mongodb://localhost:27117/?replicaSet=rs0")
-                .database("testdb")
-                .collection("schema_migrations")
-                .build();
+        configuration = new Configuration();
+        configuration.setLocation("db/migration/success");
+        configuration.setUrl("mongodb://localhost:27117/?replicaSet=rs0");
+        configuration.setDatabase("testdb");
+        configuration.setCollection("schema_migrations");
         MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbMigrate = new DbMigrate(configuration);
@@ -105,12 +104,11 @@ public class TransactionDbMigrateIT {
 
     @Test
     public void execute_GivenMigrationThrowError() {
-        configuration = Configuration.builder()
-                .location("db/migration/success,db/migration/failure")
-                .url("mongodb://localhost:27117/?replicaSet=rs0")
-                .database("testdb")
-                .collection("schema_migrations")
-                .build();
+        configuration = new Configuration();
+        configuration.setLocation("db/migration/success,db/migration/failure");
+        configuration.setUrl("mongodb://localhost:27117/?replicaSet=rs0");
+        configuration.setDatabase("testdb");
+        configuration.setCollection("schema_migrations");
         MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbMigrate = new DbMigrate(configuration);

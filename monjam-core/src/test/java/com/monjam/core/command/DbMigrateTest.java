@@ -3,7 +3,7 @@ package com.monjam.core.command;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.executor.JavaMigrationExecutor;

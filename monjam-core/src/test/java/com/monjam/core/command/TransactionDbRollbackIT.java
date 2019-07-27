@@ -4,7 +4,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.monjam.core.api.Configuration;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.Document;
 import org.junit.After;
@@ -36,12 +36,11 @@ public class TransactionDbRollbackIT {
 
     @Before
     public void setup() throws Exception {
-        configuration = Configuration.builder()
-                .location("db/migration/success")
-                .url("mongodb://localhost:27117/?replicaSet=rs0")
-                .database("testdb")
-                .collection(MIGRATIONS_COLLECTION)
-                .build();
+        configuration = new Configuration();
+        configuration.setLocation("db/migration/success");
+        configuration.setUrl("mongodb://localhost:27117/?replicaSet=rs0");
+        configuration.setDatabase("testdb");
+        configuration.setCollection(MIGRATIONS_COLLECTION);
         MongoClient client = MongoClients.create(configuration.getUrl());
         database = client.getDatabase("testdb");
         dbRollback = new DbRollback(configuration);
