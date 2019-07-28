@@ -1,6 +1,6 @@
 plugins {
 	id 'org.springframework.boot' version '2.1.6.RELEASE'
-	id 'io.github.oun.monjam' version '0.2.0'
+	id 'io.github.oun.monjam' version '0.3.0'
 	id 'io.freefair.lombok' version '3.1.4'
 	id 'java'
 }
@@ -18,12 +18,12 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'io.github.oun:monjam-core:0.2.0'
+	implementation 'io.github.oun:monjam-core:0.3.0'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 monjam {
-	url = 'mongodb://localhost:27017/?replicaSet=rs0'
+	url = 'mongodb://localhost:27017'
 	database = 'monjam_example'
 	collection = 'schema_migrations'
 	location = 'db/migration'

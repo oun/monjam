@@ -16,7 +16,7 @@ MongoDB migration
 Add gradle plugin, dependency and configuration in your build.gradle.
 ```
 plugins {
-    id 'io.github.oun.monjam' version '0.2.0'
+    id 'io.github.oun.monjam' version '0.3.0'
 }
 
 repositories {
@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.oun:monjam-core:0.2.0'
+    compile 'io.github.oun:monjam-core:0.3.0'
 }
 
 monjam {
@@ -47,17 +47,17 @@ package db.migration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.Migration;
 
-public class V1_0_0__First_Migration implements Migration {
+public class V1_0_0__Create_collection implements Migration {
     @Override
     public void up(Context context) {
-        // Execute migrate
+        // Execute on migrate
         MongoDatabase database = context.getDatabase();
         database.createCollection("my_collection");
     }
 
     @Override
     public void down(Context context) {
-        // Execute rollback
+        // Execute on rollback
         database.createCollection("my_collection").drop();
     }
 }
@@ -73,8 +73,25 @@ public class V1_0_0__First_Migration implements Migration {
 #### Execute Migrate
 `./gradlew monjamMigrate`
 
-#### Execute Rollback
-`./gradlew monjamRollback`
+As each migration get applied, the schema migration history collection (default to schema_migrations ) is updated with each document corresponding to applied migration
+```json
+{
+    "_id" : ObjectId("5d3bbedb93b76e755467566d"),
+    "version" : "1.0.0",
+    "description" : "Create collection",
+    "executedAt" : ISODate("2019-07-27T03:02:51.555Z")
+}
+```
+
+### Command
+
+#### Migrate
+
+Mirates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
+
+#### Rollback
+
+Rollback the most recently applied migration.
 
 ### Configuration
 
