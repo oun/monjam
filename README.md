@@ -5,7 +5,7 @@ MongoDB migration
 ### Features
 - Gradle plugin
 - Java based migration
-- Run migration within transaction (MongoDB 4.0+)
+- Multi-document transaction (MongoDB 4.0+)
 
 ### Road Map
 - JS script based migration
@@ -67,14 +67,14 @@ public class V1_0_0__Create_collection implements Migration {
 {Prefix}{Version}__{Description}
 - Prefix: V for versioned migration
 - Version: Sem-ver format separated each part with underscored
-- Separator: two underscores
+- Separator: Two underscores
 - Description: Underscores separated words
 
 #### Execute Migrate
 `./gradlew monjamMigrate`
 
 As each migration get applied, the schema migration history collection (default to schema_migrations ) is updated with each document corresponding to applied migration
-```json
+```
 {
     "_id" : ObjectId("5d3bbedb93b76e755467566d"),
     "version" : "1.0.0",
