@@ -2,6 +2,7 @@ package com.monjam.core.executor;
 
 import com.monjam.core.api.Context;
 import com.monjam.core.api.Migration;
+import com.monjam.core.api.MigrationType;
 
 public class JavaMigrationExecutor implements MigrationExecutor {
     private Migration migration;
@@ -11,12 +12,11 @@ public class JavaMigrationExecutor implements MigrationExecutor {
     }
 
     @Override
-    public void executeUp(Context context) {
-        migration.up(context);
-    }
-
-    @Override
-    public void executeDown(Context context) {
-        migration.down(context);
+    public void execute(Context context) {
+        if (context.getMigrationType() == MigrationType.MIGRATE) {
+            migration.up(context);
+        } else if (context.getMigrationType() == MigrationType.ROLLBACK) {
+            migration.down(context);
+        }
     }
 }

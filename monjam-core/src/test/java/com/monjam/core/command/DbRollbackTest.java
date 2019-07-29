@@ -3,15 +3,16 @@ package com.monjam.core.command;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
+import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MigrationVersion;
-import com.monjam.core.api.MonJamException;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.executor.JavaMigrationExecutor;
 import com.monjam.core.history.AppliedMigration;
 import com.monjam.core.history.MigrationHistory;
 import com.monjam.core.resolve.JavaResolvedMigration;
 import com.monjam.core.resolve.MigrationResolver;
+import com.monjam.core.resolve.NoopResolvedMigration;
 import com.monjam.core.resolve.ResolvedMigration;
 import org.junit.Before;
 import org.junit.Rule;
@@ -75,14 +76,14 @@ public class DbRollbackTest {
                 new AppliedMigration(new MigrationVersion("0.1.1"), "", executedAt)
         );
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.ROLLBACK))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), never()).executeDown(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), times(1)).executeDown(any(Context.class));
-        verify(migration_0_2.getExecutor(), never()).executeDown(any(Context.class));
+        verify(migration_0_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), times(1)).execute(any(Context.class));
+        verify(migration_0_2.getExecutor(), never()).execute(any(Context.class));
 
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
@@ -98,14 +99,14 @@ public class DbRollbackTest {
         List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1, migration_0_2);
         List<AppliedMigration> appliedMigrations = Collections.emptyList();
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.ROLLBACK))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), never()).executeDown(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), never()).executeDown(any(Context.class));
-        verify(migration_0_2.getExecutor(), never()).executeDown(any(Context.class));
+        verify(migration_0_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_2.getExecutor(), never()).execute(any(Context.class));
 
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
@@ -117,6 +118,7 @@ public class DbRollbackTest {
         ZonedDateTime executedAt = ZonedDateTime.of(2019, 6, 20, 9, 0, 0, 0, ZoneId.systemDefault());
         ResolvedMigration migration_0_1 = new JavaResolvedMigration(new MigrationVersion("0.1"), "", mock(JavaMigrationExecutor.class));
         ResolvedMigration migration_0_1_1 = new JavaResolvedMigration(new MigrationVersion("0.1.1"), "", mock(JavaMigrationExecutor.class));
+        ResolvedMigration migration_0_1_2 = new NoopResolvedMigration(new MigrationVersion("0.1.2"), "");
         List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1);
         List<AppliedMigration> appliedMigrations = Arrays.asList(
                 new AppliedMigration(new MigrationVersion("0.1.0"), "", executedAt),
@@ -124,18 +126,16 @@ public class DbRollbackTest {
                 new AppliedMigration(new MigrationVersion("0.1.2"), "", executedAt)
         );
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.ROLLBACK))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
-
-        exception.expect(MonJamException.class);
-        exception.expectMessage("Could not execute rollback migration version 0.1.2. Migration not found");
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), never()).executeDown(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), times(1)).executeDown(any(Context.class));
+        verify(migration_0_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).execute(any(Context.class));
 
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
         verify(migrationHistory, never()).removeAppliedMigration(eq(new AppliedMigration(migration_0_1_1.getVersion(), "", executedAt)));
+        verify(migrationHistory, times(1)).removeAppliedMigration(eq(new AppliedMigration(migration_0_1_2.getVersion(), "", executedAt)));
     }
 }

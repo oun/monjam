@@ -1,0 +1,1 @@
+db.users.update({status: {$exists: true}}, {$unset: {status: 1}}, {multi: true});

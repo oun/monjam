@@ -1,5 +1,6 @@
 package com.monjam.core.resolve;
 
+import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MigrationVersion;
 import com.monjam.core.api.MonJamException;
 import org.junit.Rule;
@@ -20,6 +21,7 @@ public class MigrationInfoHelperTest {
         MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
 
         assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.2.3")));
+        assertThat(migrationInfo.getType(), equalTo(MigrationType.MIGRATE));
         assertThat(migrationInfo.getDescription(), equalTo("Hello monjam"));
     }
 
@@ -50,6 +52,7 @@ public class MigrationInfoHelperTest {
         MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
 
         assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.0.0")));
+        assertThat(migrationInfo.getType(), equalTo(MigrationType.MIGRATE));
         assertThat(migrationInfo.getDescription(), equalTo("First version"));
     }
 
@@ -60,6 +63,7 @@ public class MigrationInfoHelperTest {
         MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
 
         assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.1.0")));
+        assertThat(migrationInfo.getType(), equalTo(MigrationType.MIGRATE));
         assertThat(migrationInfo.getDescription(), equalTo("Change minor version"));
     }
 
@@ -68,7 +72,7 @@ public class MigrationInfoHelperTest {
         String migrationName = "1_1__Should_have_prefix";
 
         exception.expect(MonJamException.class);
-        exception.expectMessage("Migration version should have prefix 'V'");
+        exception.expectMessage("Migration version should have prefix 'V' or 'U'");
 
         MigrationInfoHelper.extract(migrationName);
     }
@@ -89,6 +93,27 @@ public class MigrationInfoHelperTest {
 
         exception.expect(IllegalArgumentException.class);
         exception.expectMessage("Migration name must not be null");
+
+        MigrationInfoHelper.extract(migrationName);
+    }
+
+    @Test
+    public void extract_GivenPrefixRollback() {
+        String migrationName = "U1_2_3__Hello_monjam";
+
+        MigrationInfo migrationInfo = MigrationInfoHelper.extract(migrationName);
+
+        assertThat(migrationInfo.getVersion(), equalTo(new MigrationVersion("1.2.3")));
+        assertThat(migrationInfo.getType(), equalTo(MigrationType.ROLLBACK));
+        assertThat(migrationInfo.getDescription(), equalTo("Hello monjam"));
+    }
+
+    @Test
+    public void extract_GivenPrefixUnknown() {
+        String migrationName = "W1_2_3__Hello_monjam";
+
+        exception.expect(MonJamException.class);
+        exception.expectMessage("Migration version should have prefix 'V' or 'U'");
 
         MigrationInfoHelper.extract(migrationName);
     }

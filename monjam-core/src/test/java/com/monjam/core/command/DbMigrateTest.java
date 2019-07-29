@@ -3,9 +3,10 @@ package com.monjam.core.command;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
+import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.executor.JavaMigrationExecutor;
 import com.monjam.core.history.AppliedMigration;
 import com.monjam.core.history.MigrationHistory;
@@ -70,14 +71,14 @@ public class DbMigrateTest {
         List<ResolvedMigration> resolvedMigrations = Arrays.asList(migration_0_1, migration_0_1_1, migration_0_2);
         List<AppliedMigration> appliedMigrations = Collections.emptyList();
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.MIGRATE))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), only()).executeUp(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), only()).executeUp(any(Context.class));
-        verify(migration_0_2.getExecutor(), only()).executeUp(any(Context.class));
+        verify(migration_0_1.getExecutor(), only()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), only()).execute(any(Context.class));
+        verify(migration_0_2.getExecutor(), only()).execute(any(Context.class));
 
         InOrder inOrder = inOrder(migrationHistory);
         inOrder.verify(migrationHistory).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
@@ -95,7 +96,7 @@ public class DbMigrateTest {
                 new AppliedMigration(new MigrationVersion("0.2.0"), "", executedAt)
         );
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.MIGRATE))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
@@ -115,14 +116,14 @@ public class DbMigrateTest {
                 new AppliedMigration(new MigrationVersion("0.1.1"), "", executedAt)
         );
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.MIGRATE))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));
-        verify(migration_0_2.getExecutor(), times(1)).executeUp(any(Context.class));
+        verify(migration_0_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_2.getExecutor(), times(1)).execute(any(Context.class));
 
         verify(migrationHistory, times(1)).addAppliedMigration(eq(new AppliedMigration(migration_0_2.getVersion(), "", executedAt)));
         verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
@@ -143,14 +144,14 @@ public class DbMigrateTest {
                 new AppliedMigration(new MigrationVersion("0.2.1"), "", executedAt)
         );
         when(ZonedDateTime.now()).thenReturn(executedAt);
-        when(migrationResolver.resolveMigrations()).thenReturn(resolvedMigrations);
+        when(migrationResolver.resolveMigrations(eq(MigrationType.MIGRATE))).thenReturn(resolvedMigrations);
         when(migrationHistory.getAppliedMigrations()).thenReturn(appliedMigrations);
 
         command.doExecute(context, migrationResolver, migrationHistory);
 
-        verify(migration_0_1.getExecutor(), never()).executeUp(any(Context.class));
-        verify(migration_0_1_1.getExecutor(), never()).executeUp(any(Context.class));
-        verify(migration_0_2.getExecutor(), never()).executeUp(any(Context.class));
+        verify(migration_0_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_1_1.getExecutor(), never()).execute(any(Context.class));
+        verify(migration_0_2.getExecutor(), never()).execute(any(Context.class));
 
         verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1.getVersion(), "", executedAt)));
         verify(migrationHistory, never()).addAppliedMigration(eq(new AppliedMigration(migration_0_1_1.getVersion(), "", executedAt)));

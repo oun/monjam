@@ -5,7 +5,7 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
 import com.monjam.core.configuration.Configuration;
-import com.monjam.core.rule.MongoRule;
+import com.monjam.core.rule.MongoReplicaSetRule;
 import org.bson.Document;
 import org.junit.After;
 import org.junit.Before;
@@ -18,7 +18,6 @@ import java.util.List;
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Filters.exists;
 import static com.mongodb.client.model.Updates.set;
-import static com.mongodb.client.model.Updates.unset;
 import static com.monjam.core.support.MongoUtils.find;
 import static com.monjam.core.support.MongoUtils.importToCollectionFromFile;
 import static com.monjam.core.support.MongoUtils.insert;
@@ -28,15 +27,15 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 
-public class DbMigrateIT {
-    private static final String CONNECTION_URL = "mongodb://localhost:12345";
+public class DbMigrateTransactionIT {
+    private static final String CONNECTION_URL = "mongodb://localhost:27117/?replicaSet=rs0";
     private static final String DATABASE_NAME = "testdb";
     private static final String USERS_COLLECTION = "users";
     private static final String MESSAGES_COLLECTION = "messages";
     private static final String SCHEMA_COLLECTION = "schema_migrations";
 
     @ClassRule
-    public static final MongoRule MONGO_RULE = new MongoRule();
+    public static final MongoReplicaSetRule MONGO_RULE = new MongoReplicaSetRule();
 
     private Configuration configuration;
     private MongoDatabase database;
@@ -67,7 +66,7 @@ public class DbMigrateIT {
     public void execute_GivenEmptyAppliedMigrations() {
         dbMigrate.execute();
 
-        List<Document> migrations = find(database, SCHEMA_COLLECTION, Sorts.ascending("executedAt"));
+        List<Document> migrations = find(database, configuration.getCollection(), Sorts.ascending("executedAt"));
         assertThat(migrations, hasSize(6));
         assertSchemaMigration(migrations.get(0), "0.1.0", "Add prefix to user");
         assertSchemaMigration(migrations.get(1), "0.1.1", "Add status to user");
@@ -78,7 +77,6 @@ public class DbMigrateIT {
 
         List<Document> documents = find(database, USERS_COLLECTION, Sorts.ascending("createdDate"));
         assertThat(documents, hasSize(2));
-
         assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", "ACTIVE", 1, null, null);
         assertUser(documents.get(1), "palm", "Nattha", "Wijarn", "Mrs.", "ACTIVE", 2, null, null);
 
@@ -110,30 +108,6 @@ public class DbMigrateIT {
 
         assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", "ACTIVE", 1, null, null);
         assertUser(documents.get(1), "palm", "Nattha", "Wijarn", "Mrs.", "ACTIVE", 2, null, null);
-    }
-
-    @Test
-    public void execute_GivenSkipMigrations() {
-        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.1.0", "Add prefix to user"));
-        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.2.1", "Remove age from user"));
-        update(database, USERS_COLLECTION, eq("gender", "M"), set("prefix", "Mr."));
-        update(database, USERS_COLLECTION, eq("gender", "F"), set("prefix", "Mrs."));
-        update(database, USERS_COLLECTION, exists("_id", true), unset("age"));
-
-        dbMigrate.execute();
-
-        List<Document> migrations = find(database, SCHEMA_COLLECTION, Sorts.ascending("executedAt"));
-        assertThat(migrations, hasSize(4));
-        assertSchemaMigration(migrations.get(0), "0.1.0", "Add prefix to user");
-        assertSchemaMigration(migrations.get(1), "0.2.1", "Remove age from user");
-        assertSchemaMigration(migrations.get(2), "0.3.0", "Update user gender");
-        assertSchemaMigration(migrations.get(3), "0.3.1", "Update user last name");
-
-        List<Document> documents = find(database, USERS_COLLECTION, Sorts.ascending("createdDate"));
-        assertThat(documents, hasSize(2));
-
-        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", null, 1, "Oun", null);
-        assertUser(documents.get(1), "palm", "Nattha", "Wijarn", "Mrs.", null, 2, "Palm", null);
     }
 
     @Test
@@ -175,6 +149,7 @@ public class DbMigrateIT {
         assertThat(user.get("gender"), equalTo(gender));
         assertThat(user.getString("nickname"), equalTo(nickname));
         assertThat(user.getInteger("age"), equalTo(age));
+        assertThat(user.getString("dateOfBirth"), equalTo(null));
     }
 
     private void assertMessage(Document document, String message, String name, String nickname) {

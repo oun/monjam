@@ -1,8 +1,9 @@
 package com.monjam.core.command;
 
-import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
+import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.database.TransactionTemplate;
 import com.monjam.core.history.AppliedMigration;
 import com.monjam.core.history.MigrationHistory;
@@ -23,7 +24,7 @@ public class DbMigrate extends Command {
 
     @Override
     protected void doExecute(Context context, MigrationResolver migrationResolver, MigrationHistory migrationHistory) {
-        List<ResolvedMigration> resolvedMigrations = migrationResolver.resolveMigrations();
+        List<ResolvedMigration> resolvedMigrations = migrationResolver.resolveMigrations(MigrationType.MIGRATE);
         List<AppliedMigration> appliedMigrations = migrationHistory.getAppliedMigrations();
 
         MigrationVersion currentVersion = null;
@@ -35,6 +36,7 @@ public class DbMigrate extends Command {
             LOG.info("No applied migrations found");
         }
 
+        context.setMigrationType(MigrationType.MIGRATE);
         for (ResolvedMigration resolvedMigration : resolvedMigrations) {
             if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
@@ -51,7 +53,7 @@ public class DbMigrate extends Command {
     }
 
     public void applyMigration(Context context, ResolvedMigration resolvedMigration, MigrationHistory migrationHistory) {
-        resolvedMigration.getExecutor().executeUp(context);
+        resolvedMigration.getExecutor().execute(context);
         migrationHistory.addAppliedMigration(new AppliedMigration(
                 resolvedMigration.getVersion(),
                 resolvedMigration.getDescription(),
