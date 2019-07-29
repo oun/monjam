@@ -25,6 +25,4 @@ dependencies {
 monjam {
 	url = 'mongodb://localhost:27017'
 	database = 'monjam_example'
-	collection = 'schema_migrations'
-	location = 'db/migration'
 }

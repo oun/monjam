@@ -19,10 +19,6 @@ import com.monjam.core.resolve.MigrationResolver;
 import com.monjam.core.resolve.ScriptMigrationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.font.Script;
-
-import java.util.Arrays;
-import java.util.List;
 
 public abstract class Command {
     private static final Logger LOG = LoggerFactory.getLogger(Command.class);

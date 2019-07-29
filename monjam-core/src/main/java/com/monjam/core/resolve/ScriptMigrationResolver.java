@@ -36,6 +36,7 @@ public class ScriptMigrationResolver implements MigrationResolver {
                 .toArray(String[]::new);
         List<ResolvedMigration> resolvedMigrations = new ArrayList<>();
         try(ScanResult scanResult = new ClassGraph()
+                .addClassLoader(configuration.getClassLoader())
                 .whitelistPaths(locations)
                 .scan()
         ) {

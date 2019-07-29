@@ -3,7 +3,7 @@ package com.monjam.core.configuration;
 public class Configuration {
     private ClassLoader classLoader;
     private String collection = "schema_migrations";
-    private String location = "db/migrations";
+    private String location = "db/migration";
     private String url;
     private String username;
     private String password;
