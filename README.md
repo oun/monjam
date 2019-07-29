@@ -2,15 +2,15 @@
 
 MongoDB migration
 
-### Features
+## Features
 - Gradle plugin
 - Java and script migration
 - Multi-document transaction (MongoDB 4.0+)
 
-### Road Map
+## Road Map
 - Maven plugin
 
-### Installation
+## Installation
 
 Add gradle plugin, dependency and configuration in your build.gradle.
 ```
@@ -34,11 +34,11 @@ monjam {
 }
 ```
 
-### Usage
+## Usage
 
-#### Create Migration
+### Create Migration
 
-##### Java Migration
+#### Java Migration
 
 Create java based migration class implementing Migration interface. The up and down method will be executed upon running migrate and rollback command respectively.
 
@@ -71,30 +71,23 @@ public class V1_0_0__Change_user_prefix_type implements Migration {
 }
 ```
 
-##### Script Migration
+#### Script Migration
 
-Create migrate script named V1_0_0__Change_user_prefix_type.js
+Create migrate script V1_0_0__Change_user_prefix_type.js
 
 ```javascript
 db.users.update({prefix: 'Mr.'}, {$set: {prefix: 1}}, {multi: true});
 db.users.update({prefix: 'Mrs.'}, {$set: {prefix: 2}}, {multi: true});
 ```
 
-Create rollback script named U1_0_0__Revert_change_user_prefix_type.js
-
-```javascript
-db.users.update({prefix: 1}, {$set: {prefix: 'Mr.'}}, {multi: true});
-db.users.update({prefix: 2}, {$set: {prefix: 'Mrs.'}}, {multi: true});
-```
-
-##### File Name Pattern
+#### File Name Pattern
 {Prefix}{Version}__{Description}
 - Prefix: V for migrate, U for rollback (applicable to script migration)
 - Version: Sem-ver format separated each part with underscored
 - Separator: Two underscores
 - Description: Underscores separated words
 
-#### Execute Migrate
+### Execute Migrate
 `./gradlew monjamMigrate`
 
 As each migration get applied, the schema migration history collection (default to schema_migrations ) is updated with each document corresponding to applied migration
@@ -107,17 +100,17 @@ As each migration get applied, the schema migration history collection (default 
 }
 ```
 
-### Command
+## Command
 
-#### Migrate
+### Migrate
 
 Mirates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
 
-#### Rollback
+### Rollback
 
 Rollback the most recently applied migration.
 
-### Configuration
+## Configuration
 
 Configuration can be defined in build.gradle.
 ```
