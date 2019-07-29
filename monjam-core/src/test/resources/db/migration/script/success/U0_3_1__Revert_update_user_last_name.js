@@ -1,0 +1,1 @@
+db.users.update({username: 'palm'}, {$set: {lastName: 'Dechmontri'}});

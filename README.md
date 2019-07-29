@@ -1,14 +1,13 @@
-# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam) [![codecov](https://codecov.io/gh/oun/monjam/branch/master/graph/badge.svg)](https://codecov.io/gh/oun/monjam)
+# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam) [![codecov](https://codecov.io/gh/oun/monjam/branch/master/graph/badge.svg)](https://codecov.io/gh/oun/monjam) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=oun_monjam&metric=alert_status)](https://sonarcloud.io/dashboard?id=oun_monjam)
 
 MongoDB migration
 
 ### Features
 - Gradle plugin
-- Java based migration
+- Java and script migration
 - Multi-document transaction (MongoDB 4.0+)
 
 ### Road Map
-- JS script based migration
 - Maven plugin
 
 ### Installation
@@ -63,9 +62,16 @@ public class V1_0_0__Create_collection implements Migration {
 }
 ```
 
+##### Script Migration
+
+```
+db.users.update({username: 'oun'}, {$set: {status: 'ACTIVE'}});
+db.messages.update({username: 'oun'}, {$set: {name: 'Worawat Wijarn'}});
+```
+
 ##### File Name Pattern
 {Prefix}{Version}__{Description}
-- Prefix: V for versioned migration
+- Prefix: V for migrate, U for rollback (applicable to script migration)
 - Version: Sem-ver format separated each part with underscored
 - Separator: Two underscores
 - Description: Underscores separated words

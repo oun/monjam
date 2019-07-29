@@ -9,6 +9,7 @@ public class Configuration {
     private String password;
     private String authDatabase = "admin";
     private String database;
+    private String scriptMigrationExtension = "js";
 
     public ClassLoader getClassLoader() {
         return classLoader;
@@ -74,6 +75,14 @@ public class Configuration {
         this.database = database;
     }
 
+    public String getScriptMigrationExtension() {
+        return scriptMigrationExtension;
+    }
+
+    public void setScriptMigrationExtension(String scriptMigrationExtension) {
+        this.scriptMigrationExtension = scriptMigrationExtension;
+    }
+
     @Override
     public String toString() {
         return new StringBuilder()
@@ -84,6 +93,7 @@ public class Configuration {
                 .append(", password = ").append(password)
                 .append(", database = ").append(database)
                 .append(", authDatabase = ").append(authDatabase)
+                .append(", scriptMigrationExtension = ").append(scriptMigrationExtension)
                 .toString();
     }
 }

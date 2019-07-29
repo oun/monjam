@@ -50,8 +50,14 @@ public class DbTemplate {
         collection(collectionName).updateMany(filter, update);
     }
 
-    public <T> void delete(String collectionName, Bson filter) {
+    public void delete(String collectionName, Bson filter) {
         collection(collectionName).deleteMany(filter);
+    }
+
+    public void executeCommand(String command) {
+        Document cmd = new Document("eval", command);
+        // eval command is not supported in multi-document transaction
+        database.runCommand(cmd);
     }
 
     private DbCollection collection(String collectionName) {

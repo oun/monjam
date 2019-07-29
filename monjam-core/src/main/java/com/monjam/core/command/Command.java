@@ -7,16 +7,22 @@ import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoDatabase;
-import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MonJamException;
+import com.monjam.core.configuration.Configuration;
 import com.monjam.core.database.DbTemplate;
 import com.monjam.core.history.DbMigrationHistory;
 import com.monjam.core.history.MigrationHistory;
+import com.monjam.core.resolve.CompositeMigrationResolver;
 import com.monjam.core.resolve.JavaMigrationResolver;
 import com.monjam.core.resolve.MigrationResolver;
+import com.monjam.core.resolve.ScriptMigrationResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.font.Script;
+
+import java.util.Arrays;
+import java.util.List;
 
 public abstract class Command {
     private static final Logger LOG = LoggerFactory.getLogger(Command.class);
@@ -33,7 +39,7 @@ public abstract class Command {
             DbTemplate dbTemplate = new DbTemplate(client, session, configuration.getDatabase());
 
             MigrationHistory migrationHistory = new DbMigrationHistory(dbTemplate, configuration);
-            MigrationResolver migrationResolver = new JavaMigrationResolver(configuration);
+            MigrationResolver migrationResolver = createMigrationResolver();
 
             MongoDatabase database = client.getDatabase(configuration.getDatabase());
             Context context = new Context(client, database, session, configuration, supportTransaction);
@@ -41,6 +47,12 @@ public abstract class Command {
         } catch (Exception e) {
             LOG.error("Error while executing command", e);
         }
+    }
+
+    private MigrationResolver createMigrationResolver() {
+        return new CompositeMigrationResolver(
+                new JavaMigrationResolver(configuration), new ScriptMigrationResolver(configuration)
+        );
     }
 
     private ClientSession startSession(MongoClient client) {

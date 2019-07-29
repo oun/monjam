@@ -1,5 +1,6 @@
 package com.monjam.core.resolve;
 
+import com.monjam.core.api.MigrationType;
 import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Migration;
 import com.monjam.core.api.MonJamException;
@@ -23,7 +24,7 @@ public class JavaMigrationResolver implements MigrationResolver {
     }
 
     @Override
-    public List<ResolvedMigration> resolveMigrations() {
+    public List<ResolvedMigration> resolveMigrations(MigrationType type) {
         if (configuration.getLocation() == null) {
             throw new MonJamException("Missing migration location");
         }
