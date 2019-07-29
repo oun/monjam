@@ -15,7 +15,7 @@ MongoDB migration
 Add gradle plugin, dependency and configuration in your build.gradle.
 ```
 plugins {
-    id 'io.github.oun.monjam' version '0.3.0'
+    id 'io.github.oun.monjam' version '0.4.0'
 }
 
 repositories {
@@ -23,7 +23,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.oun:monjam-core:0.3.0'
+    compile 'io.github.oun:monjam-core:0.4.0'
 }
 
 monjam {
