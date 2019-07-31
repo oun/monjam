@@ -4,6 +4,10 @@ import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MonJamException;
 
 public class MigrationInfoHelper {
+    private MigrationInfoHelper() {
+        throw new IllegalStateException("This class should not instantiate");
+    }
+
     public static MigrationInfo extract(String migrationName) {
         if (migrationName == null) {
             throw new IllegalArgumentException("Migration name must not be null");
@@ -17,7 +21,7 @@ public class MigrationInfoHelper {
         }
         MigrationType type = MigrationType.fromString(parts[0].substring(0, 1));
         String version = parts[0].substring(1).replace("_", ".");
-        String description = parts.length > 1 ? parts[1].replace("_", " ") : "";
+        String description = parts[1].replace("_", " ");
         return new MigrationInfo(version, type, description);
     }
 }

@@ -14,13 +14,9 @@ public class MigrationVersion implements Comparable<MigrationVersion> {
         if (!matcher.matches()) {
             throw new MonJamException("Invalid version. Version must be [number].[number].[number]");
         }
-        try {
-            versionParts = new ArrayList<>();
-            for (String part : version.split("\\.")) {
-                versionParts.add(Integer.parseInt(part));
-            }
-        } catch (NumberFormatException e) {
-            throw new MonJamException("Version not containing number", e);
+        versionParts = new ArrayList<>();
+        for (String part : version.split("\\.")) {
+            versionParts.add(Integer.parseInt(part));
         }
         for (int i = versionParts.size(); i <= 3; i++) {
             versionParts.add(0);

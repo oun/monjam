@@ -3,6 +3,10 @@ package com.monjam.core.resolve;
 import com.monjam.core.api.MonJamException;
 
 public class ClassUtils {
+    private ClassUtils() {
+        throw new IllegalStateException("This class should not instantiate");
+    }
+
     public static final <T> T instantiate(Class<?> clazz) {
         try {
             return (T) clazz.newInstance();
