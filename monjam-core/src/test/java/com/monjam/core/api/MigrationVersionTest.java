@@ -142,4 +142,13 @@ public class MigrationVersionTest {
 
         assertThat(result, equalTo(false));
     }
+
+    @Test
+    public void equals_GivenOtherObject() {
+        MigrationVersion version = new MigrationVersion("1.2.3");
+
+        boolean result = version.equals("1.2.3");
+
+        assertThat(result, equalTo(false));
+    }
 }

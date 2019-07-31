@@ -15,6 +15,10 @@ public class ConfigurationUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConfigurationUtils.class);
 
+    private ConfigurationUtils() {
+        throw new IllegalStateException("This class should not instantiate");
+    }
+
     public static void populate(Configuration configuration, Map<String, ?> properties) {
         try {
             for (Map.Entry<String, ?> entry : properties.entrySet()) {

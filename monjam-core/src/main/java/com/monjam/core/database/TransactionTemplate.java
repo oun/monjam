@@ -10,9 +10,6 @@ import java.util.function.Consumer;
 public class TransactionTemplate {
     private static final Logger LOG = LoggerFactory.getLogger(TransactionTemplate.class);
 
-    public TransactionTemplate() {
-    }
-
     public void executeInTransaction(Context context, Consumer<Context> callback) {
         ClientSession session = context.getSession();
         try {

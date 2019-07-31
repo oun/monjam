@@ -2,7 +2,6 @@ package com.monjam.core.command;
 
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationType;
-import com.monjam.core.api.MonJamException;
 import com.monjam.core.configuration.Configuration;
 import com.monjam.core.database.TransactionTemplate;
 import com.monjam.core.history.AppliedMigration;

@@ -57,8 +57,8 @@ public class ScriptMigrationResolver implements MigrationResolver {
     }
 
     private String convertPathToMigrationName(String path) {
-        String fileName = path.substring(path.lastIndexOf("/") + 1);
-        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String fileName = path.substring(path.lastIndexOf('/') + 1);
+        String extension = fileName.substring(fileName.lastIndexOf('.'));
         return fileName.substring(0, fileName.length() - extension.length());
     }
 }
