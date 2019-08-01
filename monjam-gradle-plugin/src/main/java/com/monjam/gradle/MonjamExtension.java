@@ -8,6 +8,7 @@ public class MonjamExtension {
     private String password;
     private String authDatabase;
     private String database;
+    private String target;
     private String scriptMigrationExtension;
 
     public String getLocation() {
@@ -64,6 +65,14 @@ public class MonjamExtension {
 
     public void setAuthDatabase(String authDatabase) {
         this.authDatabase = authDatabase;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
     }
 
     public String getScriptMigrationExtension() {

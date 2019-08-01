@@ -90,7 +90,7 @@ db.users.update({prefix: 'Mrs.'}, {$set: {prefix: 2}}, {multi: true});
 ### Execute Migrate
 `./gradlew monjamMigrate`
 
-As each migration get applied, the schema migration history collection (default to schema_migrations ) is updated with each document corresponding to applied migration
+As each migration get applied, the schema migration history collection (default to schema_migrations) is updated with each document corresponding to applied migration
 ```
 {
     "_id" : ObjectId("5d3bbedb93b76e755467566d"),
@@ -106,9 +106,13 @@ As each migration get applied, the schema migration history collection (default 
 
 Mirates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
 
+Usage `gradle monjamMigrate -Pmonjam.target={version}`
+
 ### Rollback
 
 Rollback the most recently applied migration.
+
+Usage `gradle monjamRollback -Pmonjam.target={version}`
 
 ## Configuration
 
@@ -124,7 +128,7 @@ monjam {
 or using gradle properties passed directly via command-line.
 `./gradlew monjamMigrate -Pmonjam.username=admin -Pmonjam.password=secret`
 
-| name        | description                      | default |
+| Name        | Description                      | Default |
 |-------------|----------------------------------|---------|
 | url         | Connection url                   | -       |
 | database    | Database name                    | -       |
@@ -132,5 +136,6 @@ or using gradle properties passed directly via command-line.
 | password    | Password                         | -       |
 | authDatabase | Authentication database name    | admin   |
 | collection  | Collection that store applied schema migrations | schema_migrations |
-| location    | Schema migration files location  | db/migration |
+| location    | Schema migration files locations | db/migration |
+| target      | Target version to migrate or rollback. For migrate, migration with version equals or higher will be ignored. For rollback, migration with version equals or lower will be ignored | latest version (migrate), previous version (rollback) |
 | scriptMigrationExtension | Script migration file extension | js |

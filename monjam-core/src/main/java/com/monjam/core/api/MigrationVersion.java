@@ -1,11 +1,15 @@
 package com.monjam.core.api;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MigrationVersion implements Comparable<MigrationVersion> {
+    public static final MigrationVersion LATEST = new MigrationVersion(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    public static final MigrationVersion EMPTY = new MigrationVersion(Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE);
+
     private static final Pattern PATTERN = Pattern.compile("(\\d+)(\\.\\d+)?(\\.\\d+)?");
     private List<Integer> versionParts;
 
@@ -21,6 +25,10 @@ public class MigrationVersion implements Comparable<MigrationVersion> {
         for (int i = versionParts.size(); i <= 3; i++) {
             versionParts.add(0);
         }
+    }
+
+    private MigrationVersion(Integer major, Integer minor, Integer patch) {
+        this.versionParts = Arrays.asList(major, minor, patch);
     }
 
     public Integer getMajor() {

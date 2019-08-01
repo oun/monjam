@@ -9,6 +9,7 @@ public class Configuration {
     private String password;
     private String authDatabase = "admin";
     private String database;
+    private String target;
     private String scriptMigrationExtension = "js";
 
     public ClassLoader getClassLoader() {
@@ -73,6 +74,14 @@ public class Configuration {
 
     public void setDatabase(String database) {
         this.database = database;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
     }
 
     public String getScriptMigrationExtension() {

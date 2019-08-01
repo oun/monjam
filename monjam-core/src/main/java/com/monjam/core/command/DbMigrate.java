@@ -3,6 +3,7 @@ package com.monjam.core.command;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationType;
 import com.monjam.core.api.MigrationVersion;
+import com.monjam.core.api.MonJamException;
 import com.monjam.core.configuration.Configuration;
 import com.monjam.core.database.TransactionTemplate;
 import com.monjam.core.history.AppliedMigration;
@@ -33,15 +34,29 @@ public class DbMigrate extends Command {
             currentVersion = lastAppliedMigration.getVersion();
             LOG.info("Last applied migration version {}", currentVersion);
         } else {
+            currentVersion = MigrationVersion.EMPTY;
             LOG.info("No applied migrations found");
         }
-
+        MigrationVersion targetVersion = configuration.getTarget() == null
+                ? MigrationVersion.LATEST
+                : new MigrationVersion(configuration.getTarget());
+        LOG.info("Executing migration up to version {}", targetVersion);
+        if (targetVersion.compareTo(currentVersion) < 0) {
+            throw new MonJamException("Target version is less than current applied migration version");
+        }
+        if (!targetVersion.equals(MigrationVersion.LATEST)) {
+            resolvedMigrations.stream().filter(resolvedMigration -> resolvedMigration.getVersion().equals(targetVersion)).findFirst()
+                    .orElseThrow(() -> new MonJamException("Target version " + targetVersion + " not found"));
+        }
         context.setMigrationType(MigrationType.MIGRATE);
         for (ResolvedMigration resolvedMigration : resolvedMigrations) {
-            if (currentVersion != null && currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
+            if (currentVersion.compareTo(resolvedMigration.getVersion()) >= 0) {
                 continue;
             }
-            LOG.info("Execute up schema migration version {}", resolvedMigration.getVersion());
+            if (resolvedMigration.getVersion().compareTo(targetVersion) > 0) {
+                break;
+            }
+            LOG.info("Execute migration version {}", resolvedMigration.getVersion());
             if (context.isSupportTransaction()) {
                 new TransactionTemplate().executeInTransaction(context, ctx ->
                         applyMigration(ctx, resolvedMigration, migrationHistory)
