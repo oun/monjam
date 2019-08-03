@@ -91,14 +91,10 @@ db.users.update({prefix: 'Mrs.'}, {$set: {prefix: 2}}, {multi: true});
 `./gradlew monjamMigrate`
 
 As each migration get applied, the schema migration history collection (default to schema_migrations) is updated with each document corresponding to applied migration
-```
-{
-    "_id" : ObjectId("5d3bbedb93b76e755467566d"),
-    "version" : "1.0.0",
-    "description" : "Change user prefix type",
-    "executedAt" : ISODate("2019-07-27T03:02:51.555Z")
-}
-```
+
+| _id | version | description | executedAt |
+|-----|---------|-------------|------------|
+| 5d3bbedb93b76e755467566d | 1.0.0 | Change user prefix type | 2019-07-27T03:02:51.555Z |
 
 ## Command
 
@@ -137,5 +133,5 @@ or using gradle properties passed directly via command-line.
 | authDatabase | Authentication database name    | admin   |
 | collection  | Collection that store applied schema migrations | schema_migrations |
 | location    | Schema migration files locations | db/migration |
-| target      | Target version to migrate or rollback. For migrate, migration with version equals or higher will be ignored. For rollback, migration with version equals or lower will be ignored | latest version (migrate), previous version (rollback) |
+| target      | Target version to migrate or rollback. For migrate, migration with version higher will be ignored. For rollback, migration with version equals or lower will be ignored | latest version (migrate), previous version (rollback) |
 | scriptMigrationExtension | Script migration file extension | js |

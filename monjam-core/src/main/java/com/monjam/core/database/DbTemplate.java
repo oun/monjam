@@ -60,6 +60,14 @@ public class DbTemplate {
         database.runCommand(cmd);
     }
 
+    public void createIndex(String collectionName, Bson keys) {
+        collection(collectionName).createIndex(keys);
+    }
+
+    public void dropIndex(String collectionName, Bson keys) {
+        collection(collectionName).dropIndex(keys);
+    }
+
     private DbCollection collection(String collectionName) {
         return session != null
                 ? new SessionDbCollection(database, session, collectionName)

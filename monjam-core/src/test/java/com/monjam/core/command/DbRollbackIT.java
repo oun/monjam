@@ -44,7 +44,7 @@ public class DbRollbackIT {
     @Before
     public void setup() throws Exception {
         configuration = new Configuration();
-        configuration.setLocation("db/migration/success,db/migration/script/success");
+        configuration.setLocation("db/migration/success,db/migration/annotation,db/migration/script/success");
         configuration.setUrl(CONNECTION_URL);
         configuration.setDatabase(DATABASE_NAME);
         configuration.setCollection(SCHEMA_COLLECTION);
@@ -70,8 +70,8 @@ public class DbRollbackIT {
         List<Document> documents = find(database, USERS_COLLECTION, Sorts.ascending("createdDate"));
         assertThat(documents, hasSize(2));
 
-        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", null, null, "M", "Oun", 30);
-        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", null, null, "F", "Palm", 20);
+        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", null, null, "M", "Oun", 30, null);
+        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", null, null, "F", "Palm", 20, null);
     }
 
     @Test
@@ -91,8 +91,8 @@ public class DbRollbackIT {
         List<Document> documents = find(database, USERS_COLLECTION, Sorts.ascending("createdDate"));
         assertThat(documents, hasSize(2));
 
-        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", null, "M", "Oun", 30);
-        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", "Mrs.", null, "F", "Palm", 20);
+        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", null, "M", "Oun", 30, null);
+        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", "Mrs.", null, "F", "Palm", 20, null);
     }
 
     @Test
@@ -120,8 +120,37 @@ public class DbRollbackIT {
         assertThat(documents, hasSize(2));
 
         // user age is still removed
-        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", "ACTIVE", "M", null, null);
-        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", "Mrs.", "ACTIVE", "F", null, null);
+        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", "ACTIVE", "M", null, null, null);
+        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", "Mrs.", "ACTIVE", "F", null, null, null);
+    }
+
+    @Test
+    public void execute_GivenTargetVersion() {
+        configuration.setTarget("0.1.0");
+        dbRollback = new DbRollback(configuration);
+
+        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.1.0", "Add prefix to user"));
+        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.1.1", "Add status to user"));
+        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.1.2", "Add marital status"));
+        insert(database, SCHEMA_COLLECTION, mockSchemaMigration("0.3.0", "Update user gender"));
+        update(database, USERS_COLLECTION, eq("gender", "M"), set("prefix", "Mr."));
+        update(database, USERS_COLLECTION, eq("gender", "F"), set("prefix", "Mrs."));
+        update(database, USERS_COLLECTION, exists("_id", true), set("status", "ACTIVE"));
+        update(database, USERS_COLLECTION, exists("_id", true), set("maritalStatus", "M"));
+        update(database, USERS_COLLECTION, eq("gender", "M"), set("gender", 1));
+        update(database, USERS_COLLECTION, eq("gender", "F"), set("gender", 2));
+
+        dbRollback.execute();
+
+        List<Document> migrations = find(database, SCHEMA_COLLECTION, Sorts.ascending("executedAt"));
+        assertThat(migrations, hasSize(1));
+        assertSchemaMigration(migrations.get(0), "0.1.0", "Add prefix to user");
+
+        List<Document> documents = find(database, USERS_COLLECTION, Sorts.ascending("createdDate"));
+        assertThat(documents, hasSize(2));
+
+        assertUser(documents.get(0), "oun", "Worawat", "Wijarn", "Mr.", null, "M", "Oun", 30, null);
+        assertUser(documents.get(1), "palm", "Nattha", "Dechmontri", "Mrs.", null, "F", "Palm", 20, null);
     }
 
     private void assertSchemaMigration(Document migration, String version, String description) {
@@ -129,7 +158,7 @@ public class DbRollbackIT {
         assertThat(migration.getString("description"), equalTo(description));
     }
 
-    private void assertUser(Document user, String username, String firstName, String lastName, String prefix, String status, String gender, String nickname, Integer age) {
+    private void assertUser(Document user, String username, String firstName, String lastName, String prefix, String status, String gender, String nickname, Integer age, String maritalStatus) {
         assertThat(user.getString("username"), equalTo(username));
         assertThat(user.getString("firstName"), equalTo(firstName));
         assertThat(user.getString("lastName"), equalTo(lastName));
@@ -138,6 +167,7 @@ public class DbRollbackIT {
         assertThat(user.getString("gender"), equalTo(gender));
         assertThat(user.getString("nickname"), equalTo(nickname));
         assertThat(user.getInteger("age"), equalTo(age));
+        assertThat(user.getString("maritalStatus"), equalTo(maritalStatus));
     }
 
     private Document mockSchemaMigration(String version, String description) {

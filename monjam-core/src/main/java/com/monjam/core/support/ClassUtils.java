@@ -1,4 +1,4 @@
-package com.monjam.core.resolve;
+package com.monjam.core.support;
 
 import com.monjam.core.api.MonJamException;
 

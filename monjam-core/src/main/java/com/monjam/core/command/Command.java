@@ -13,6 +13,7 @@ import com.monjam.core.configuration.Configuration;
 import com.monjam.core.database.DbTemplate;
 import com.monjam.core.history.DbMigrationHistory;
 import com.monjam.core.history.MigrationHistory;
+import com.monjam.core.resolve.AnnotationMigrationResolver;
 import com.monjam.core.resolve.CompositeMigrationResolver;
 import com.monjam.core.resolve.JavaMigrationResolver;
 import com.monjam.core.resolve.MigrationResolver;
@@ -47,7 +48,7 @@ public abstract class Command {
 
     private MigrationResolver createMigrationResolver() {
         return new CompositeMigrationResolver(
-                new JavaMigrationResolver(configuration), new ScriptMigrationResolver(configuration)
+                new JavaMigrationResolver(configuration), new AnnotationMigrationResolver(configuration), new ScriptMigrationResolver(configuration)
         );
     }
 

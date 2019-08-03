@@ -18,8 +18,8 @@ public class V0_3_0__Update_user_gender implements Migration {
 
     @Override
     public void down(Context context) {
-        dbTemplate(context).update(COLLECTION, eq("gender", "1"), set("gender", "M"));
-        dbTemplate(context).update(COLLECTION, eq("gender", "2"), set("gender", "F"));
+        dbTemplate(context).update(COLLECTION, eq("gender", 1), set("gender", "M"));
+        dbTemplate(context).update(COLLECTION, eq("gender", 2), set("gender", "F"));
     }
 
     private DbTemplate dbTemplate(Context context) {

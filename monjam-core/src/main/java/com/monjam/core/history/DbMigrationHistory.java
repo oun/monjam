@@ -40,7 +40,7 @@ public class DbMigrationHistory implements MigrationHistory {
 
     @Override
     public List<AppliedMigration> getAppliedMigrations() {
-        Collection<AppliedMigration> appliedMigrations = dbTemplate.find(Sorts.ascending(EXECUTED_AT), configuration.getCollection(), document -> new AppliedMigration(
+        Collection<AppliedMigration> appliedMigrations = dbTemplate.find(Sorts.ascending(VERSION), configuration.getCollection(), document -> new AppliedMigration(
                 new MigrationVersion(document.getString(VERSION)),
                 document.getString(DESCRIPTION),
                 ZonedDateTime.ofInstant(document.getDate(EXECUTED_AT).toInstant(), ZoneOffset.UTC.normalized())
