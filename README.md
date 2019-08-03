@@ -9,6 +9,7 @@ MongoDB migration
 
 ## Road Map
 - Maven plugin
+- Validate, info, clean command
 
 ## Installation
 
@@ -138,15 +139,15 @@ As each migration get applied, the schema migration history collection (default 
 
 ### Migrate
 
-Mirates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
+`gradle monjamMigrate`
 
-Usage `gradle monjamMigrate -Pmonjam.target={version}`
+Migrates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
 
 ### Rollback
 
-Rollback the most recently applied migration.
+`gradle monjamRollback`
 
-Usage `gradle monjamRollback -Pmonjam.target={version}`
+Rollback the most recently applied migration.
 
 ## Configuration
 
