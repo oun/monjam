@@ -9,6 +9,7 @@ MongoDB migration
 
 ## Road Map
 - Maven plugin
+- Validate, info, clean command
 
 ## Installation
 
@@ -34,9 +35,47 @@ monjam {
 }
 ```
 
+See the [code example](https://github.com/oun/monjam-example) in Spring-based application.
+
 ## Usage
 
 ### Create Migration
+
+Annotated class with @MongoMigration annotation and each methods with @Migrate annotation. Method with annotation parameter type MIGRATE and ROLLBACK will be executed on migrate and rollback respectively.
+
+#### Annotated Migration
+```java
+package db.migration.annotation;
+
+import com.monjam.core.annotation.Migrate;
+import com.monjam.core.annotation.MongoMigration;
+import com.monjam.core.api.Context;
+import com.monjam.core.api.MigrationType;
+import com.mongodb.client.MongoCollection;
+
+import static com.mongodb.client.model.Filters.eq;
+import static com.mongodb.client.model.Updates.set;
+
+@MongoMigration
+public class UserMigration {
+
+    @Migrate(type = MigrationType.MIGRATE, version = "1.0.0", description = "Change user prefix type")
+    public void changeUserPrefixType(Context context) {
+        // Execute on migrate version 1.0.0
+        MongoCollection collection = context.getDatabase().getCollection("users");
+        collection.updateMany(context.getSession(), eq("prefix", "Mr."), set("prefix", 1));
+        collection.updateMany(context.getSession(), eq("prefix", "Mrs."), set("prefix", 2));
+    }
+
+    @Migrate(type = MigrationType.ROLLBACK, version = "1.0.0", description = "Revert user prefix type")
+    public void revertChangeUserPrefixType(Context context) {
+        // Execute on rollback version 1.0.0
+        MongoCollection collection = context.getDatabase().getCollection("users");
+        collection.updateMany(context.getSession(), eq("prefix", 1), set("prefix", "Mr."));
+        collection.updateMany(context.getSession(), eq("prefix", 2), set("prefix", "Mrs."));
+    }
+}
+```
 
 #### Java Migration
 
@@ -91,28 +130,24 @@ db.users.update({prefix: 'Mrs.'}, {$set: {prefix: 2}}, {multi: true});
 `./gradlew monjamMigrate`
 
 As each migration get applied, the schema migration history collection (default to schema_migrations) is updated with each document corresponding to applied migration
-```
-{
-    "_id" : ObjectId("5d3bbedb93b76e755467566d"),
-    "version" : "1.0.0",
-    "description" : "Change user prefix type",
-    "executedAt" : ISODate("2019-07-27T03:02:51.555Z")
-}
-```
+
+| _id | version | description | executedAt |
+|-----|---------|-------------|------------|
+| 5d3bbedb93b76e755467566d | 1.0.0 | Change user prefix type | 2019-07-27T03:02:51.555Z |
 
 ## Command
 
 ### Migrate
 
-Mirates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
+`gradle monjamMigrate`
 
-Usage `gradle monjamMigrate -Pmonjam.target={version}`
+Migrates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
 
 ### Rollback
 
-Rollback the most recently applied migration.
+`gradle monjamRollback`
 
-Usage `gradle monjamRollback -Pmonjam.target={version}`
+Rollback the most recently applied migration.
 
 ## Configuration
 
@@ -137,5 +172,5 @@ or using gradle properties passed directly via command-line.
 | authDatabase | Authentication database name    | admin   |
 | collection  | Collection that store applied schema migrations | schema_migrations |
 | location    | Schema migration files locations | db/migration |
-| target      | Target version to migrate or rollback. For migrate, migration with version equals or higher will be ignored. For rollback, migration with version equals or lower will be ignored | latest version (migrate), previous version (rollback) |
+| target      | Target version to migrate or rollback. For migrate, migration with version higher will be ignored. For rollback, migration with version equals or lower will be ignored | latest version (migrate), previous version (rollback) |
 | scriptMigrationExtension | Script migration file extension | js |

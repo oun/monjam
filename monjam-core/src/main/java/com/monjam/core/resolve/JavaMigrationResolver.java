@@ -4,6 +4,7 @@ import com.monjam.core.api.MigrationType;
 import com.monjam.core.configuration.Configuration;
 import com.monjam.core.api.Migration;
 import com.monjam.core.api.MonJamException;
+import com.monjam.core.support.ClassUtils;
 import io.github.classgraph.ClassGraph;
 import io.github.classgraph.ScanResult;
 import org.slf4j.Logger;

@@ -20,4 +20,8 @@ public interface DbCollection {
     DeleteResult deleteOne(Bson filter);
 
     DeleteResult deleteMany(Bson filter);
+
+    void createIndex(Bson keys);
+
+    void dropIndex(Bson keys);
 }

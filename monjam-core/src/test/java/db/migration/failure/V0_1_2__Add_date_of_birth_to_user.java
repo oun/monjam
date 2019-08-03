@@ -10,7 +10,7 @@ import static com.mongodb.client.model.Updates.set;
 import static com.mongodb.client.model.Updates.unset;
 
 public class V0_1_2__Add_date_of_birth_to_user implements Migration {
-    private static final String COLLECTION = "messages";
+    private static final String COLLECTION = "users";
 
     @Override
     public void up(Context context) {

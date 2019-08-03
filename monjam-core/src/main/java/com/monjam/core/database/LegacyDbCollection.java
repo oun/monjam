@@ -49,4 +49,14 @@ public class LegacyDbCollection implements DbCollection {
     public DeleteResult deleteMany(Bson filter) {
         return delegate.deleteMany(filter);
     }
+
+    @Override
+    public void createIndex(Bson keys) {
+        delegate.createIndex(keys);
+    }
+
+    @Override
+    public void dropIndex(Bson keys) {
+        delegate.dropIndex(keys);
+    }
 }

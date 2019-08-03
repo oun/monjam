@@ -52,4 +52,14 @@ public class SessionDbCollection implements DbCollection {
     public DeleteResult deleteMany(Bson filter) {
         return delegate.deleteMany(session, filter);
     }
+
+    @Override
+    public void createIndex(Bson keys) {
+        delegate.createIndex(session, keys);
+    }
+
+    @Override
+    public void dropIndex(Bson keys) {
+        delegate.dropIndex(session, keys);
+    }
 }
