@@ -52,9 +52,6 @@ import com.monjam.core.annotation.Migrate;
 import com.monjam.core.annotation.MongoMigration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationType;
-import com.mongodb.client.MongoCollection;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.set;
 
 @MongoMigration
 public class UserMigration {
@@ -77,11 +74,8 @@ Create java based migration class implementing Migration interface. The up and d
 ```java
 package db.migration;
 
-import com.mongodb.client.MongoCollection;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.Migration;
-import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Updates.set;
 
 public class V1_0_0__Change_user_prefix_type implements Migration {
     @Override
