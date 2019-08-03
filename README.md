@@ -17,7 +17,7 @@ MongoDB migration
 Add gradle plugin, dependency and configuration in your build.gradle.
 ```
 plugins {
-    id 'io.github.oun.monjam' version '0.4.0'
+    id 'io.github.oun.monjam' version '0.5.0'
 }
 
 repositories {
@@ -25,7 +25,7 @@ repositories {
 }
 
 dependencies {
-    compile 'io.github.oun:monjam-core:0.4.0'
+    compile 'io.github.oun:monjam-core:0.5.0'
 }
 
 monjam {
@@ -42,7 +42,7 @@ See the [code example](https://github.com/oun/monjam-example) for Spring-based a
 
 ### Create Migration
 
-Annotated class with @MongoMigration annotation and each methods with @Migrate annotation. Method with annotation parameter type MIGRATE and ROLLBACK will be executed on migrate and rollback respectively.
+Annotated class with **@MongoMigration** annotation and each methods with **@Migrate** annotation. Method with annotation parameter type *MIGRATE* and *ROLLBACK* will be executed on running migrate and rollback command respectively.
 
 #### Annotation based Java Migration
 ```java
@@ -92,7 +92,7 @@ public class V1_0_0__Change_user_prefix_type implements Migration {
 
 #### Script Migration
 
-Create migrate script V1_0_0__Change_user_prefix_type.js
+Create migrate script `V1_0_0__Change_user_prefix_type.js`
 
 ```javascript
 db.users.update({prefix: 'Mr.'}, {$set: {prefix: 1}}, {multi: true});
@@ -100,7 +100,9 @@ db.users.update({prefix: 'Mrs.'}, {$set: {prefix: 2}}, {multi: true});
 ```
 
 #### File Name Pattern
-{Prefix}{Version}__{Description}
+
+Java class and script file must follow naming pattern `{Prefix}{Version}__{Description}`
+
 - Prefix: V for migrate, U for rollback (applicable to script migration)
 - Version: Sem-ver format separated each part with underscored
 - Separator: Two underscores
