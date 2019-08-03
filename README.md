@@ -8,6 +8,7 @@ MongoDB migration
 - Multi-document transaction (MongoDB 4.0+)
 
 ## Road Map
+- Integration with Spring MongoTemplate
 - Maven plugin
 - Validate, info, clean command
 
@@ -35,7 +36,7 @@ monjam {
 }
 ```
 
-See the [code example](https://github.com/oun/monjam-example) in Spring-based application.
+See the [code example](https://github.com/oun/monjam-example) for Spring-based application.
 
 ## Usage
 
@@ -43,36 +44,28 @@ See the [code example](https://github.com/oun/monjam-example) in Spring-based ap
 
 Annotated class with @MongoMigration annotation and each methods with @Migrate annotation. Method with annotation parameter type MIGRATE and ROLLBACK will be executed on migrate and rollback respectively.
 
-#### Annotated Migration
+#### Annotation based Java Migration
 ```java
-package db.migration.annotation;
+package db.migration;
 
 import com.monjam.core.annotation.Migrate;
 import com.monjam.core.annotation.MongoMigration;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.MigrationType;
 import com.mongodb.client.MongoCollection;
-
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
 @MongoMigration
 public class UserMigration {
-
     @Migrate(type = MigrationType.MIGRATE, version = "1.0.0", description = "Change user prefix type")
     public void changeUserPrefixType(Context context) {
         // Execute on migrate version 1.0.0
-        MongoCollection collection = context.getDatabase().getCollection("users");
-        collection.updateMany(context.getSession(), eq("prefix", "Mr."), set("prefix", 1));
-        collection.updateMany(context.getSession(), eq("prefix", "Mrs."), set("prefix", 2));
     }
 
     @Migrate(type = MigrationType.ROLLBACK, version = "1.0.0", description = "Revert user prefix type")
     public void revertChangeUserPrefixType(Context context) {
         // Execute on rollback version 1.0.0
-        MongoCollection collection = context.getDatabase().getCollection("users");
-        collection.updateMany(context.getSession(), eq("prefix", 1), set("prefix", "Mr."));
-        collection.updateMany(context.getSession(), eq("prefix", 2), set("prefix", "Mrs."));
     }
 }
 ```
@@ -87,7 +80,6 @@ package db.migration;
 import com.mongodb.client.MongoCollection;
 import com.monjam.core.api.Context;
 import com.monjam.core.api.Migration;
-
 import static com.mongodb.client.model.Filters.eq;
 import static com.mongodb.client.model.Updates.set;
 
@@ -95,17 +87,11 @@ public class V1_0_0__Change_user_prefix_type implements Migration {
     @Override
     public void up(Context context) {
         // Execute on migrate
-        MongoCollection collection = context.getDatabase().getCollection("users");
-        collection.updateMany(context.getSession(), eq("prefix", "Mr."), set("prefix", 1));
-        collection.updateMany(context.getSession(), eq("prefix", "Mrs."), set("prefix", 2));
     }
 
     @Override
     public void down(Context context) {
         // Execute on rollback
-        MongoCollection collection = context.getDatabase().getCollection("users");
-        collection.updateMany(context.getSession(), eq("prefix", 1), set("prefix", "Mr."));
-        collection.updateMany(context.getSession(), eq("prefix", 2), set("prefix", "Mrs."));
     }
 }
 ```
