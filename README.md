@@ -1,4 +1,4 @@
-# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam) [![codecov](https://codecov.io/gh/oun/monjam/branch/master/graph/badge.svg)](https://codecov.io/gh/oun/monjam) [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=oun_monjam&metric=alert_status)](https://sonarcloud.io/dashboard?id=oun_monjam)
+# MonJam [![Build Status](https://travis-ci.com/oun/monjam.svg?branch=master)](https://travis-ci.com/oun/monjam) [![codecov](https://codecov.io/gh/oun/monjam/branch/master/graph/badge.svg)](https://codecov.io/gh/oun/monjam)
 
 MongoDB migration
 
@@ -119,17 +119,10 @@ As each migration get applied, the schema migration history collection (default 
 
 ## Command
 
-### Migrate
-
-`gradle monjamMigrate`
-
-Migrates database to the latest version. Monjam will create schema migration history collection automatically if it does not exists.
-
-### Rollback
-
-`gradle monjamRollback`
-
-Rollback the most recently applied migration.
+| Command | Gradle Task | Description |
+|---------|-------------|-------------|
+| Migrate | monjamMigrate | Migrates database to the latest version or target version |
+| Rollback | monjamRollback | Rollback the most recently applied migration or target version |
 
 ## Configuration
 

@@ -16,6 +16,7 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public abstract class AbstractMonjamTask extends DefaultTask {
 
     public AbstractMonjamTask() {
         super();
+        setDependsOn(Arrays.asList("compileJava", "processResources"));
         setGroup("Monjam");
         extension = (MonjamExtension) getProject().getExtensions().getByName("monjam");
     }
